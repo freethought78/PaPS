@@ -1,0 +1,67 @@
+<html>
+<head>
+<link rel="stylesheet" href = "https://cdn.jsdelivr.net/npm/subjx@0.2.5/dist/style/subjx.css" />
+</head>
+<body>
+<svg id="stage" width=100% height=100% style="position: absolute; left: 0; top: 0; z-index: 0;"></svg>
+<div id="menu" style="position: relative;">
+<button onclick = "addcard();">Add Card</button>
+</div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/subjx@0.2.5/dist/js/subjx.js"></script>
+<script>
+	var gameobjects = [];
+	submitcard("https://img.scryfall.com/cards/large/front/b/d/bd8fa327-dd41-4737-8f19-2cf5eb1f7cdd.jpg?1562933099");
+	submitcard("https://cdn.anyfinder.eu/assets/d04adebdef021030c18c0ddf08cba28e6979ddb35cfdbc2eedfedab8f8d07e2c");
+	submitcard("https://image.shutterstock.com/image-photo/three-hearts-white-playing-card-600w-1160879863.jpg");
+	submitcard("https://static-cdn.jtvnw.net/jtv_user_pictures/chunkatuff-profile_image-bc5888d4f2190362-300x300.jpeg");
+	submitcard("https://iscnow.us/wp-content/uploads/2018/03/Test.png");
+
+function addcard(){
+	deselectall();
+	var menu = document.getElementById("menu");
+	menu.innerHTML += "<input id='cardurl'></input><button onclick = 'submitcard();'>Submit</button>";
+}
+
+function submitcard(url){
+	deselectall();
+	if (url==null){
+		url = document.getElementById("cardurl").value;
+	}
+	var menu = document.getElementById("menu");
+	var stage = document.getElementById("stage");
+	stage.innerHTML += "<image class='object' onclick = 'makeTarget(this);' href='"+url+"' height='200' width='200' />";
+	menu.innerHTML = "<button onclick = 'addcard();'>Add Card</button>";
+}
+
+function makeTarget(element){
+	deselectall();
+	var targets = document.getElementsByClassName("target");
+	if (targets.length > 0) {targets[0].classList.remove("target");}
+	element.classList.add("target");
+	bringtofront(element);
+	createGameObject();
+}
+
+function bringtofront(element){
+	var source = element.outerHTML;
+	console.log(source);
+	var parent = element.parentNode;
+	parent.removeChild(element);
+	parent.innerHTML += source;
+}
+
+
+function createGameObject(){
+	deselectall();
+	gameobjects = subjx('.target').drag();
+}
+
+function deselectall(){
+	gameobjects.forEach(item => {
+		item.disable();
+	});
+}
+</script>
