@@ -16,6 +16,7 @@
 	var gameobjects = [];
 	var selectedobjects = [];
 	var menu = document.getElementById("menu");
+	var gamedefinitionurl = "test.txt";
 
 	
 	createMenu();
@@ -30,12 +31,27 @@ function createMenu(){
 	var menucode = '<button onclick = "addcard();">Add Card</button>'+
 	'<button onclick = "selectAll();">Select All</button>'+
 	'<button onclick = "deselectAll();">Deselect All</button>'+
-	'<button onclick = "cloneSelected();">Clone</button>';
+	'<button onclick = "cloneSelected();">Clone</button>'+
+	'<button onclick = "saveGame()">Save Game</button>'+
+	'<button onclick = "loadGame(gamedefinitionurl)">Load Game</button>';
+	
 	
 	menu.innerHTML = menucode;
 }
 
-function cloneSelected(copyattributes = false){
+function saveGame(){
+	deselectAll();
+	state = stage.innerHTML;
+	download(state, "test.txt", "text");
+}
+
+function loadGame(url){
+fetch(url)
+  .then(response => response.text())
+  .then(text => stage.innerHTML = text)
+}
+
+function cloneSelected(copyattributes = false, onlydata=false){
 	var targets = document.getElementsByClassName("target");
 	var imageurl = targets[0].getAttribute('href');
 	var x = targets[0].getAttribute('x');
@@ -43,17 +59,21 @@ function cloneSelected(copyattributes = false){
 	var height = targets[0].getAttribute('height');
 	var width = targets[0].getAttribute('width');
 	var transform = targets[0].getAttribute('transform');
-	deselectAll();
-	
-	if (copyattributes == true){
-		submitcard(imageurl, true, x,y,width,height,transform);
-	} else{
-		submitcard (imageurl, true);
-	}
-	targets[0].classList.remove("target");
-	
-	selectTargettedObjects();
+	if (onlydata == false){	
+		deselectAll();
+		
 
+			if (copyattributes == true){
+				submitcard(imageurl, true, x,y,width,height,transform);
+			} else{
+				submitcard (imageurl, true);
+			}
+
+		targets[0].classList.remove("target");
+		
+		selectTargettedObjects();
+	}
+	
 	var props = {};
 	props.imageurl = imageurl;
 	props.x = x;
@@ -61,6 +81,7 @@ function cloneSelected(copyattributes = false){
 	props.width = width;
 	props.height = height;
 	props.transform = transform;
+	
 	return (props);
 }
 
@@ -121,5 +142,23 @@ function deselectAll(){
 function selectAll(){
 	deselectAll();
 	selectedobjects = subjx('.object').drag();
+}
+
+function download(data, filename, type) {
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
 }
 </script>
