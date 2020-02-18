@@ -1,0 +1,205 @@
+<html>
+<head>
+<link rel="stylesheet" href = "https://cdn.jsdelivr.net/npm/subjx@0.2.5/dist/style/subjx.css" />
+</head>
+<body>
+<svg id="stage" width=100% height=100% style="position: absolute; left: 0; top: 0; z-index: 0; background-color:green;"></svg>
+<div id="menu" style="position: relative;">
+
+</div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/subjx@0.2.5/dist/js/subjx.js"></script>
+<script>
+	
+	
+	var stage = document.getElementById("stage");
+	var backgroundColor = "#66ffff";
+	var gameobjects = [];
+	var selectedobjects = [];
+	var menu = document.getElementById("menu");
+	var gamedefinitionurl = "test.txt";
+
+	createMenu();
+	
+	var backgroundColorSelector = document.getElementById("colorpicker");
+	
+	setBackgroundColor();
+	
+	
+	
+	submitcard("https://img.scryfall.com/cards/large/front/b/d/bd8fa327-dd41-4737-8f19-2cf5eb1f7cdd.jpg?1562933099");
+	submitcard("https://cdn.anyfinder.eu/assets/d04adebdef021030c18c0ddf08cba28e6979ddb35cfdbc2eedfedab8f8d07e2c");
+	submitcard("https://image.shutterstock.com/image-photo/three-hearts-white-playing-card-600w-1160879863.jpg");
+	submitcard("https://static-cdn.jtvnw.net/jtv_user_pictures/chunkatuff-profile_image-bc5888d4f2190362-300x300.jpeg");
+	submitcard("https://iscnow.us/wp-content/uploads/2018/03/Test.png");
+
+function createMenu(){
+	var menucode = '<button onclick = "addcard();">Add Card</button>'+
+	'<button onclick = "selectAll();">Select All</button>'+
+	'<button onclick = "deselectAll();">Deselect All</button>'+
+	'<button onclick = "cloneSelected(true);">Clone</button>'+
+	'<button onclick = "deleteSelected();">Delete</button>'+
+	'<button onclick = "saveGame()">Save Game</button>'+
+	'<button onclick = "loadGame(gamedefinitionurl)">Load Game</button>'+
+	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
+	
+	
+	
+	
+	menu.innerHTML = menucode;
+	
+	backgroundColorSelector = document.getElementById("colorpicker");
+}
+
+function setBackgroundColor(){
+	backgroundColor = backgroundColorSelector.value;
+	console.log(backgroundColor);
+	var style = "position: absolute; left: 0; top: 0; z-index: 0; background-color:"+ backgroundColor;
+	stage.setAttribute("style", style);
+}
+
+function deleteSelected(){
+	[].forEach.call(document.querySelectorAll('.target'),function(e){
+		e.parentNode.removeChild(e);
+	});
+	deselectAll();
+}
+
+function saveGame(){
+	deselectAll();
+	state = stage.innerHTML;
+	download(state, "test.txt", "text");
+}
+
+function loadGame(url){
+fetch(url)
+  .then(response => response.text())
+  .then(text => stage.innerHTML = text)
+}
+
+function cloneSelected(copyattributes = false, onlydata=false){
+	var targets = document.getElementsByClassName("target");
+	var imageurl = targets[0].getAttribute('href');
+	var x = targets[0].getAttribute('x');
+	var y = targets[0].getAttribute('y');
+	var height = targets[0].getAttribute('height');
+	var width = targets[0].getAttribute('width');
+	var transform = targets[0].getAttribute('transform');
+	if (onlydata == false){	
+		deselectAll();
+		
+
+			if (copyattributes == true){
+				submitcard(imageurl, true, x,y,width,height,transform);
+			} else{
+				submitcard (imageurl, true);
+			}
+
+		//targets[0].classList.remove("target");
+		
+		selectTargettedObjects();
+	}
+	
+	var props = {};
+	props.imageurl = imageurl;
+	props.x = x;
+	props.y = y;
+	props.width = width;
+	props.height = height;
+	props.transform = transform;
+	
+	return (props);
+}
+
+function addcard(){
+	deselectAll();
+	menu.innerHTML += "<input id='cardurl'></input><button onclick = 'submitcard();'>Submit</button>";
+}
+
+function submitcard(url, maketarget=false, x=0, y=0, width=200, height=200, transform){
+	deselectAll();
+	if (url==null){
+		url = document.getElementById("cardurl").value;
+	}
+	var stage = document.getElementById("stage");
+	var imagecode = "<image class='object";
+	if (maketarget == true){imagecode+=" target";}
+	imagecode+="' onclick = 'makeTarget(this);'"+
+	" href='"+url+
+	"' height='"+height+
+	"' width='"+width+
+	"' x='"+x+
+	"' y='"+y+"'";
+	if (transform != null){ imagecode += "' transform='"+transform+"'";}
+	imagecode+=" />";
+	stage.innerHTML += imagecode;
+	createMenu();
+}
+
+function makeTarget(element){
+	deselectAll();
+	var targets = document.getElementsByClassName("target");
+	if (targets.length > 0) {targets[0].classList.remove("target");}
+	element.classList.add("target");
+	bringtofront(element);
+	selectTargettedObjects();
+}
+
+function bringtofront(element){
+	var source = element.outerHTML;
+	console.log(source);
+	var parent = element.parentNode;
+	parent.removeChild(element);
+	parent.innerHTML += source;
+}
+
+
+function selectTargettedObjects(){
+	//deselectAll();
+	selectedobjects = subjx('.target').drag({
+		snap: {
+			x: 1,
+			y: 1,
+			angle: 1
+		}
+	});
+}
+
+function deselectAll(){
+	selectedobjects.forEach(item => {
+		item.disable();
+	});
+
+	[].forEach.call(document.querySelectorAll('.target'),function(e){
+		e.classList.remove("target");
+	});
+}
+
+function selectAll(){
+	deselectAll();
+	[].forEach.call(document.querySelectorAll('.object'),function(e){
+		e.classList.add("target");
+	});
+	selectTargettedObjects();
+}
+
+function download(data, filename, type) {
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
+}
+</script>
