@@ -1,27 +1,38 @@
 <html>
 <head>
-<link rel="stylesheet" href = "https://cdn.jsdelivr.net/npm/subjx@0.2.5/dist/style/subjx.css" />
+<script src="libs\fabric.min.js"></script>
+<script src="libs\jquery-3.4.1.min.js"></script>
 </head>
-<body>
-<svg id="stage" width=100% height=100% style="position: absolute; left: 0; top: 0; z-index: 0; background-color:green;"></svg>
-<div id="menu" style="position: relative;">
+<body style="margin:0">
 
+
+<div id="menu" style="position: absolute; top: 0; left: 0; z-index: 1;">
 </div>
+
 </body>
 </html>
 
-<script src="https://cdn.jsdelivr.net/npm/subjx@0.2.5/dist/js/subjx.js"></script>
 <script>
-	
-	
-	var stage = document.getElementById("stage");
 	var backgroundColor = "#66ffff";
+	var canvas = createCanvas();
+	var zoom = 1;
+
+	addZoomListener();
+	addWindowResizeListener();
+	addTestImage();
+	canvas.setZoom(zoom);
+	
+	createMenu();	
+	
+	
+	var stage = document.getElementById("c");
+
 	var gameobjects = [];
 	var selectedobjects = [];
 	var menu = document.getElementById("menu");
 	var gamedefinitionurl = "test.txt";
 
-	createMenu();
+
 	
 	var backgroundColorSelector = document.getElementById("colorpicker");
 	
@@ -30,10 +41,136 @@
 	
 	
 	submitcard("https://img.scryfall.com/cards/large/front/b/d/bd8fa327-dd41-4737-8f19-2cf5eb1f7cdd.jpg?1562933099");
-	submitcard("https://cdn.anyfinder.eu/assets/d04adebdef021030c18c0ddf08cba28e6979ddb35cfdbc2eedfedab8f8d07e2c");
 	submitcard("https://image.shutterstock.com/image-photo/three-hearts-white-playing-card-600w-1160879863.jpg");
 	submitcard("https://static-cdn.jtvnw.net/jtv_user_pictures/chunkatuff-profile_image-bc5888d4f2190362-300x300.jpeg");
 	submitcard("https://iscnow.us/wp-content/uploads/2018/03/Test.png");
+	
+function addWindowResizeListener(){
+	$(window).resize(function(){
+		var contents = JSON.stringify(canvas);
+		canvas = createCanvas();
+		canvas.loadFromJSON(contents);
+	});
+}
+
+function createCanvas(){
+	var height = $(window).height();
+	var width = $(window).width();
+
+	var canvascode = "<canvas id='c' width='"+width+"' height='"+height+"'></canvas>"
+
+	$("body").append(canvascode);
+	var canvas = new fabric.Canvas('c');
+
+	canvas.setDimensions({
+		width: "100%",
+		height: "100%"
+	},{
+		cssOnly: true
+	});
+	return(canvas);
+}
+
+
+function addTestImage(){
+	fabric.Image.fromURL('https://cdn.pixabay.com/photo/2015/02/24/15/41/dog-647528__340.jpg', function(img) {
+	  img.scale(1).set({
+		left: 150,
+		top: 150,
+		angle: -15
+	  });
+	  canvas.add(img).setActiveObject(img);
+	});
+}
+
+function submitcard(url){
+	if (url==null){
+		url = document.getElementById("cardurl").value;
+	}
+	fabric.Image.fromURL(url, function(img) {
+	  img.scale(0.3);
+	  canvas.add(img).setActiveObject(img);
+	});
+	createMenu();
+}
+
+
+function addZoomListener(){
+	canvas.on('mouse:wheel', function(opt) {
+	var delta = opt.e.deltaY;
+	zoom = canvas.getZoom();
+	zoom = zoom + delta/200;
+	if (zoom > 20) zoom = 20;
+	if (zoom < 0.01) zoom = 0.01;
+	canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+	opt.e.preventDefault();
+	opt.e.stopPropagation();
+	constrainViewport();
+});
+	  
+	  
+	$(document).keypress(function(e) {
+		zoom = canvas.getZoom();
+		var sensitivity = 0.01;
+		var adjusted = false;
+		if (e.which == 114){
+			zoom+=sensitivity;
+			adjusted = true;
+		}
+		if (e.which == 102){	
+			zoom-=sensitivity;
+			adjusted = true;
+		}
+		if (e.which == 97){
+			canvas.relativePan(new fabric.Point(10, 0));
+			adjusted = true;
+		}
+		if(e.which == 100){
+			canvas.relativePan(new fabric.Point(-10, 0));
+			adjusted = true;
+		}
+		if (e.which == 119){
+			canvas.relativePan(new fabric.Point(0, 10));
+			adjusted = true;
+		}
+		if(e.which == 115){
+			canvas.relativePan(new fabric.Point(0, -10));
+			adjusted = true;
+		}		
+		if (adjusted == true){
+			constrainZoom();
+			constrainViewport();
+			canvas.setZoom(zoom);
+			
+		};
+	});
+}
+
+function constrainZoom(){
+	if (zoom > 20) zoom = 20;
+	if (zoom < 0.01) zoom = 0.01;
+}
+
+function constrainViewport(){
+	var vpt = canvas.viewportTransform;
+
+	
+	if (zoom < 400 / 1000) {
+		vpt[4] = 200 - 1000 * zoom / 2;
+		vpt[5] = 200 - 1000 * zoom / 2;
+	} else {
+		if (vpt[4] >= 0) {
+			vpt[4] = 0;
+		} else if (vpt[4] < canvas.getWidth() - 1000 * zoom) {
+			vpt[4] = canvas.getWidth() - 1000 * zoom;
+		}
+		if (vpt[5] >= 0) {
+			vpt[5] = 0;
+		} else if (vpt[5] < canvas.getHeight() - 1000 * zoom) {
+			vpt[5] = canvas.getHeight() - 1000 * zoom;
+		}
+	}
+}	
 
 function createMenu(){
 	var menucode = '<button onclick = "addcard();">Add Card</button>'+
@@ -45,16 +182,13 @@ function createMenu(){
 	'<button onclick = "loadGame(gamedefinitionurl)">Load Game</button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
 	
-	
-	
-	
-	menu.innerHTML = menucode;
+	$("#menu").html(menucode);
 	
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
 
 function setBackgroundColor(){
-	backgroundColor = backgroundColorSelector.value;
+	//backgroundColor = backgroundColorSelector.value;
 	console.log(backgroundColor);
 	var style = "position: absolute; left: 0; top: 0; z-index: 0; background-color:"+ backgroundColor;
 	stage.setAttribute("style", style);
@@ -118,12 +252,12 @@ function addcard(){
 	menu.innerHTML += "<input id='cardurl'></input><button onclick = 'submitcard();'>Submit</button>";
 }
 
+/*
 function submitcard(url, maketarget=false, x=0, y=0, width=200, height=200, transform){
 	deselectAll();
 	if (url==null){
 		url = document.getElementById("cardurl").value;
 	}
-	var stage = document.getElementById("stage");
 	var imagecode = "<image class='object";
 	if (maketarget == true){imagecode+=" target";}
 	imagecode+="' onclick = 'makeTarget(this);'"+
@@ -137,6 +271,7 @@ function submitcard(url, maketarget=false, x=0, y=0, width=200, height=200, tran
 	stage.innerHTML += imagecode;
 	createMenu();
 }
+*/
 
 function makeTarget(element){
 	deselectAll();
