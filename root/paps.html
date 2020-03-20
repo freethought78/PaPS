@@ -3,6 +3,7 @@
 <script src="libs\fabric.min.js"></script>
 <script src="libs\jquery-3.4.1.min.js"></script>
 </head>
+<input id="inputfiledialog" type="file" style="position: fixed; top: -100em" onchange="loadFile(this.value)">
 <body style="margin:0">
 <div id="menu" style="position: absolute; top: 0; left: 0; z-index: 1;">
 </div>
@@ -187,12 +188,16 @@ function createMenu(){
 	'<button onclick = "cloneSelected(true);">Clone</button>'+
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
-	'<button onclick = "loadGame(gamedefinitionurl)">Load Game</button>'+
+	'<button onclick = "openfiledialog();">Load Game</button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
 	
 	$("#menu").html(menucode);
 	
 	backgroundColorSelector = document.getElementById("colorpicker");
+}
+
+function openfiledialog(){
+	$("#inputfiledialog").click();
 }
 
 function setBackgroundColor(){
@@ -210,10 +215,17 @@ function saveGame(){
 	download(state, "test.txt", "text");
 }
 
-function loadGame(url){
-fetch(url)
-  .then(response => response.text())
-  .then(text => canvas.loadFromJSON(text, canvas.renderAll.bind(canvas)))
+function loadFile(fileToRead){
+	var reader = new FileReader();
+	var fileToRead = document.querySelector('input').files[0];
+	reader.addEventListener("loadend", function() {
+	   loadGame(reader.result);
+	});
+	reader.readAsText(fileToRead);
+}
+
+function loadGame(inputJSON){
+	canvas.loadFromJSON(inputJSON, canvas.renderAll.bind(canvas));
 }
 
 function cloneSelected(copyattributes = false, onlydata=false){
