@@ -4,52 +4,60 @@
 <script src="libs\jquery-3.4.1.min.js"></script>
 </head>
 <body style="margin:0">
-
-
 <div id="menu" style="position: absolute; top: 0; left: 0; z-index: 1;">
 </div>
-
 </body>
 </html>
-
 <script>
-	var backgroundColor = "#66ffff";
-	var canvas = createCanvas();
-	var zoom = 1;
-
-	addZoomListener();
-	addWindowResizeListener();
-	addTestImage();
-	canvas.setZoom(zoom);
-	
-	createMenu();	
-	
-	
-	var stage = document.getElementById("c");
-
-	var gameobjects = [];
-	var selectedobjects = [];
+	var _clipboard;
+	var backgroundColor;
+	var canvas;
+	var zoom;
+	var stage;
 	var menu = document.getElementById("menu");
 	var gamedefinitionurl = "test.txt";
-
-
+	var backgroundColorSelector;	
 	
-	var backgroundColorSelector = document.getElementById("colorpicker");
-	
-	setBackgroundColor();
-	
-	
+	initialize();
 	
 	submitcard("https://img.scryfall.com/cards/large/front/b/d/bd8fa327-dd41-4737-8f19-2cf5eb1f7cdd.jpg?1562933099");
 	submitcard("https://image.shutterstock.com/image-photo/three-hearts-white-playing-card-600w-1160879863.jpg");
 	submitcard("https://static-cdn.jtvnw.net/jtv_user_pictures/chunkatuff-profile_image-bc5888d4f2190362-300x300.jpeg");
 	submitcard("https://iscnow.us/wp-content/uploads/2018/03/Test.png");
+	addTestImage();
+	
+function initialize(){
+	backgroundColor = "#66ffff";
+	canvas = createCanvas();
+	zoom = 1;
+
+	addZoomListener();
+	addWindowResizeListener();
+
+	canvas.setZoom(zoom);
+	
+	createMenu();	
+	
+	stage = document.getElementById("c");
+
+	menu = document.getElementById("menu");
+	gamedefinitionurl = "test.txt";
+	
+	backgroundColorSelector = document.getElementById("colorpicker");
+	
+	setBackgroundColor();
+}
 	
 function addWindowResizeListener(){
 	$(window).resize(function(){
 		var contents = JSON.stringify(canvas);
+		$(".canvas-container").remove();
+		
 		canvas = createCanvas();
-		canvas.loadFromJSON(contents);
+		canvas.loadFromJSON(contents, canvas.renderAll.bind(canvas));
+		
+
+		setBackgroundColor();
 	});
 }
 
@@ -68,9 +76,11 @@ function createCanvas(){
 	},{
 		cssOnly: true
 	});
+	
+	stage = document.getElementById("c");
+	
 	return(canvas);
 }
-
 
 function addTestImage(){
 	fabric.Image.fromURL('https://cdn.pixabay.com/photo/2015/02/24/15/41/dog-647528__340.jpg', function(img) {
@@ -174,8 +184,6 @@ function constrainViewport(){
 
 function createMenu(){
 	var menucode = '<button onclick = "addcard();">Add Card</button>'+
-	'<button onclick = "selectAll();">Select All</button>'+
-	'<button onclick = "deselectAll();">Deselect All</button>'+
 	'<button onclick = "cloneSelected(true);">Clone</button>'+
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
@@ -188,137 +196,36 @@ function createMenu(){
 }
 
 function setBackgroundColor(){
-	//backgroundColor = backgroundColorSelector.value;
-	console.log(backgroundColor);
+	backgroundColor = backgroundColorSelector.value;
 	var style = "position: absolute; left: 0; top: 0; z-index: 0; background-color:"+ backgroundColor;
 	stage.setAttribute("style", style);
 }
 
 function deleteSelected(){
-	[].forEach.call(document.querySelectorAll('.target'),function(e){
-		e.parentNode.removeChild(e);
-	});
-	deselectAll();
+	canvas.remove(canvas.getActiveObject());
 }
 
 function saveGame(){
-	deselectAll();
-	state = stage.innerHTML;
+	state = JSON.stringify(canvas);
 	download(state, "test.txt", "text");
 }
 
 function loadGame(url){
 fetch(url)
   .then(response => response.text())
-  .then(text => stage.innerHTML = text)
+  .then(text => canvas.loadFromJSON(text, canvas.renderAll.bind(canvas)))
 }
 
 function cloneSelected(copyattributes = false, onlydata=false){
-	var targets = document.getElementsByClassName("target");
-	var imageurl = targets[0].getAttribute('href');
-	var x = targets[0].getAttribute('x');
-	var y = targets[0].getAttribute('y');
-	var height = targets[0].getAttribute('height');
-	var width = targets[0].getAttribute('width');
-	var transform = targets[0].getAttribute('transform');
-	if (onlydata == false){	
-		deselectAll();
-		
-
-			if (copyattributes == true){
-				submitcard(imageurl, true, x,y,width,height,transform);
-			} else{
-				submitcard (imageurl, true);
-			}
-
-		//targets[0].classList.remove("target");
-		
-		selectTargettedObjects();
-	}
-	
-	var props = {};
-	props.imageurl = imageurl;
-	props.x = x;
-	props.y = y;
-	props.width = width;
-	props.height = height;
-	props.transform = transform;
-	
-	return (props);
+	canvas.getActiveObject().clone(function(cloned) {
+		Paste(cloned);
+	});
 }
 
 function addcard(){
-	deselectAll();
 	menu.innerHTML += "<input id='cardurl'></input><button onclick = 'submitcard();'>Submit</button>";
 }
 
-/*
-function submitcard(url, maketarget=false, x=0, y=0, width=200, height=200, transform){
-	deselectAll();
-	if (url==null){
-		url = document.getElementById("cardurl").value;
-	}
-	var imagecode = "<image class='object";
-	if (maketarget == true){imagecode+=" target";}
-	imagecode+="' onclick = 'makeTarget(this);'"+
-	" href='"+url+
-	"' height='"+height+
-	"' width='"+width+
-	"' x='"+x+
-	"' y='"+y+"'";
-	if (transform != null){ imagecode += "' transform='"+transform+"'";}
-	imagecode+=" />";
-	stage.innerHTML += imagecode;
-	createMenu();
-}
-*/
-
-function makeTarget(element){
-	deselectAll();
-	var targets = document.getElementsByClassName("target");
-	if (targets.length > 0) {targets[0].classList.remove("target");}
-	element.classList.add("target");
-	bringtofront(element);
-	selectTargettedObjects();
-}
-
-function bringtofront(element){
-	var source = element.outerHTML;
-	console.log(source);
-	var parent = element.parentNode;
-	parent.removeChild(element);
-	parent.innerHTML += source;
-}
-
-
-function selectTargettedObjects(){
-	//deselectAll();
-	selectedobjects = subjx('.target').drag({
-		snap: {
-			x: 1,
-			y: 1,
-			angle: 1
-		}
-	});
-}
-
-function deselectAll(){
-	selectedobjects.forEach(item => {
-		item.disable();
-	});
-
-	[].forEach.call(document.querySelectorAll('.target'),function(e){
-		e.classList.remove("target");
-	});
-}
-
-function selectAll(){
-	deselectAll();
-	[].forEach.call(document.querySelectorAll('.object'),function(e){
-		e.classList.add("target");
-	});
-	selectTargettedObjects();
-}
 
 function download(data, filename, type) {
     var file = new Blob([data], {type: type});
@@ -336,5 +243,39 @@ function download(data, filename, type) {
             window.URL.revokeObjectURL(url);  
         }, 0); 
     }
+}
+
+function Copy() {
+	canvas.getActiveObject().clone(function(cloned) {
+		_clipboard = cloned;
+	});
+}
+
+function Paste(source) {
+	if (source == null){source = _clipboard}
+	// clone again, so you can do multiple copies.
+	source.clone(function(clonedObj) {
+		canvas.discardActiveObject();
+		clonedObj.set({
+			left: clonedObj.left + 10,
+			top: clonedObj.top + 10,
+			evented: true,
+		});
+		if (clonedObj.type === 'activeSelection') {
+			// active selection needs a reference to the canvas.
+			clonedObj.canvas = canvas;
+			clonedObj.forEachObject(function(obj) {
+				canvas.add(obj);
+			});
+			// this should solve the unselectability
+			clonedObj.setCoords();
+		} else {
+			canvas.add(clonedObj);
+		}
+		source.top += 10;
+		source.left += 10;
+		canvas.setActiveObject(clonedObj);
+		canvas.requestRenderAll();
+	});
 }
 </script>

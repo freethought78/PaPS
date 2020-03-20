@@ -1,30 +1,11 @@
-[Mon Feb 17 21:41:49 2020] [notice] Apache/2.2.15 (Win32) PHP/5.2.13 configured -- resuming normal operations
-[Mon Feb 17 21:41:49 2020] [notice] Server built: Mar  4 2010 11:27:46
-[Mon Feb 17 21:41:49 2020] [notice] Parent: Created child process 7324
-[Mon Feb 17 21:41:50 2020] [notice] Child 7324: Child process is running
-[Mon Feb 17 21:41:50 2020] [notice] Child 7324: Acquired the start mutex.
-[Mon Feb 17 21:41:50 2020] [notice] Child 7324: Starting 64 worker threads.
-[Mon Feb 17 21:41:50 2020] [notice] Child 7324: Starting thread to listen on port 80.
-[Mon Feb 17 21:41:52 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/root/favicon.ico, referer: http://localhost/
-[Mon Feb 17 21:48:43 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 21:52:07 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 21:52:18 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 21:53:26 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 21:53:44 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 21:53:55 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 22:00:15 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 22:00:31 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 22:02:19 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 22:02:19 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 22:02:28 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Mon Feb 17 22:02:28 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/phpmyadmin/js/mootools-more.js, referer: http://localhost/phpmyadmin/tbl_addfield.php
-[Tue Feb 18 00:21:11 2020] [error] [client 127.0.0.1] PHP Fatal error:  Call to a member function fetch_assoc() on a non-object in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 27
-[Tue Feb 18 00:21:52 2020] [error] [client 127.0.0.1] PHP Fatal error:  Call to a member function fetch_assoc() on a non-object in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 27
-[Tue Feb 18 00:24:46 2020] [error] [client 127.0.0.1] PHP Fatal error:  Call to a member function fetch_assoc() on a non-object in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 27
-[Tue Feb 18 00:29:37 2020] [error] [client 127.0.0.1] PHP Parse error:  syntax error, unexpected $end in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 37
-[Tue Feb 18 00:29:53 2020] [error] [client 127.0.0.1] PHP Warning:  Invalid argument supplied for foreach() in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 34
-[Tue Feb 18 00:31:44 2020] [error] [client 127.0.0.1] PHP Notice:  Trying to get property of non-object in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 34
-[Tue Feb 18 00:32:21 2020] [error] [client 127.0.0.1] PHP Parse error:  syntax error, unexpected T_CONSTANT_ENCAPSED_STRING, expecting T_STRING or T_VARIABLE or '{' or '$' in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 34
-[Tue Feb 18 00:35:23 2020] [error] [client 127.0.0.1] PHP Notice:  Trying to get property of non-object in C:\\Users\\Free Thought\\Desktop\\GameShelf\\root\\index.php on line 34
-[Tue Feb 18 00:38:50 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/root/Checkers Preview.png, referer: http://localhost/
-[Tue Feb 18 00:41:08 2020] [error] [client 127.0.0.1] File does not exist: C:/Users/Free Thought/Desktop/GameShelf/root/Checkers, referer: http://localhost/
+[Thu Mar 19 21:06:34 2020] [notice] Apache/2.2.15 (Win32) PHP/5.2.13 configured -- resuming normal operations
+[Thu Mar 19 21:06:34 2020] [notice] Server built: Mar  4 2010 11:27:46
+[Thu Mar 19 21:06:34 2020] [notice] Parent: Created child process 12028
+[Thu Mar 19 21:06:35 2020] [notice] Child 12028: Child process is running
+[Thu Mar 19 21:06:35 2020] [notice] Child 12028: Acquired the start mutex.
+[Thu Mar 19 21:06:35 2020] [notice] Child 12028: Starting 64 worker threads.
+[Thu Mar 19 21:06:35 2020] [notice] Child 12028: Starting thread to listen on port 80.
+[Thu Mar 19 21:06:36 2020] [error] [client 127.0.0.1] File does not exist: C:/repos/PaPS/root/favicon.ico, referer: http://localhost/
+[Thu Mar 19 22:03:31 2020] [error] [client 122.165.140.147] File does not exist: C:/repos/PaPS/root/TP
+[Thu Mar 19 22:03:35 2020] [error] [client 122.165.140.147] File does not exist: C:/repos/PaPS/root/TP
+[Thu Mar 19 22:03:39 2020] [error] [client 122.165.140.147] File does not exist: C:/repos/PaPS/root/thinkphp
