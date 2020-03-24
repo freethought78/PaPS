@@ -1,0 +1,305 @@
+	var _clipboard;
+	var backgroundColor;
+	var canvas;
+	var zoom;
+	var stage;
+	var menu = document.getElementById("menu");
+	var gamedefinitionurl = "test.txt";
+	var backgroundColorSelector;	
+	
+	$(function(){
+		var body = '<input id="inputfiledialog" type="file" style="position: fixed; top: -100em" onchange="loadFile(this.value)">'+
+		'<div id="menu" style="position: absolute; top: 0; left: 0; z-index: 1;"></div>';
+		$("body").css('margin', 0);
+		$("body").html(body);
+		initialize();
+	})
+	
+	//initialize();
+	
+	//submitcard("https://img.scryfall.com/cards/large/front/b/d/bd8fa327-dd41-4737-8f19-2cf5eb1f7cdd.jpg?1562933099");
+	//submitcard("https://image.shutterstock.com/image-photo/three-hearts-white-playing-card-600w-1160879863.jpg");
+	//submitcard("https://static-cdn.jtvnw.net/jtv_user_pictures/chunkatuff-profile_image-bc5888d4f2190362-300x300.jpeg");
+	//submitcard("https://iscnow.us/wp-content/uploads/2018/03/Test.png");
+	//addTestImage();
+	
+function initialize(){
+	backgroundColor = "#66ffff";
+	canvas = createCanvas();
+	zoom = 1;
+
+	addZoomListener();
+	addWindowResizeListener();
+
+	canvas.setZoom(zoom);
+	
+	createMenu();	
+	
+	stage = document.getElementById("c");
+
+	menu = document.getElementById("menu");
+	gamedefinitionurl = "test.txt";
+	
+	backgroundColorSelector = document.getElementById("colorpicker");
+	
+	setBackgroundColor();
+}
+
+function loadScript(url, callback)
+{
+    // Adding the script tag to the head as suggested before
+    var head = document.head;
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = url;
+
+    // Then bind the event to the callback function.
+    // There are several events for cross browser compatibility.
+    script.onreadystatechange = callback;
+    script.onload = callback;
+
+    // Fire the loading
+    head.appendChild(script);
+}
+	
+function addWindowResizeListener(){
+	$(window).resize(function(){
+		var contents = JSON.stringify(canvas);
+		$(".canvas-container").remove();
+		
+		canvas = createCanvas();
+		canvas.loadFromJSON(contents, canvas.renderAll.bind(canvas));
+		
+
+		setBackgroundColor();
+	});
+}
+
+function createCanvas(){
+	var height = $(window).height();
+	var width = $(window).width();
+
+	var canvascode = "<canvas id='c' width='"+width+"' height='"+height+"'></canvas>"
+
+	$("body").append(canvascode);
+	var canvas = new fabric.Canvas('c');
+
+	canvas.setDimensions({
+		width: "100%",
+		height: "100%"
+	},{
+		cssOnly: true
+	});
+	
+	stage = document.getElementById("c");
+	
+	return(canvas);
+}
+
+function addTestImage(){
+	fabric.Image.fromURL('https://cdn.pixabay.com/photo/2015/02/24/15/41/dog-647528__340.jpg', function(img) {
+	  img.scale(1).set({
+		left: 150,
+		top: 150,
+		angle: -15
+	  });
+	  canvas.add(img).setActiveObject(img);
+	});
+}
+
+function submitcard(url){
+	if (url==null){
+		url = document.getElementById("cardurl").value;
+	}
+	fabric.Image.fromURL(url, function(img) {
+	  img.scale(0.3);
+	  canvas.add(img).setActiveObject(img);
+	});
+	createMenu();
+}
+
+
+function addZoomListener(){
+	canvas.on('mouse:wheel', function(opt) {
+	var delta = opt.e.deltaY;
+	zoom = canvas.getZoom();
+	zoom = zoom + delta/200;
+	if (zoom > 20) zoom = 20;
+	if (zoom < 0.01) zoom = 0.01;
+	canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+	opt.e.preventDefault();
+	opt.e.stopPropagation();
+	constrainViewport();
+});
+	  
+	  
+	$(document).keypress(function(e) {
+		zoom = canvas.getZoom();
+		var sensitivity = 0.01;
+		var adjusted = false;
+		if (e.which == 114){
+			zoom+=sensitivity;
+			adjusted = true;
+		}
+		if (e.which == 102){	
+			zoom-=sensitivity;
+			adjusted = true;
+		}
+		if (e.which == 97){
+			canvas.relativePan(new fabric.Point(10, 0));
+			adjusted = true;
+		}
+		if(e.which == 100){
+			canvas.relativePan(new fabric.Point(-10, 0));
+			adjusted = true;
+		}
+		if (e.which == 119){
+			canvas.relativePan(new fabric.Point(0, 10));
+			adjusted = true;
+		}
+		if(e.which == 115){
+			canvas.relativePan(new fabric.Point(0, -10));
+			adjusted = true;
+		}		
+		if (adjusted == true){
+			constrainZoom();
+			constrainViewport();
+			canvas.setZoom(zoom);
+			
+		};
+	});
+}
+
+function constrainZoom(){
+	if (zoom > 20) zoom = 20;
+	if (zoom < 0.01) zoom = 0.01;
+}
+
+function constrainViewport(){
+	var vpt = canvas.viewportTransform;
+
+	
+	if (zoom < 400 / 1000) {
+		vpt[4] = 200 - 1000 * zoom / 2;
+		vpt[5] = 200 - 1000 * zoom / 2;
+	} else {
+		if (vpt[4] >= 0) {
+			vpt[4] = 0;
+		} else if (vpt[4] < canvas.getWidth() - 1000 * zoom) {
+			vpt[4] = canvas.getWidth() - 1000 * zoom;
+		}
+		if (vpt[5] >= 0) {
+			vpt[5] = 0;
+		} else if (vpt[5] < canvas.getHeight() - 1000 * zoom) {
+			vpt[5] = canvas.getHeight() - 1000 * zoom;
+		}
+	}
+}	
+
+function createMenu(){
+	var menucode = '<button onclick = "addcard();">Add Card</button>'+
+	'<button onclick = "cloneSelected();">Clone</button>'+
+	'<button onclick = "deleteSelected();">Delete</button>'+
+	'<button onclick = "saveGame()">Save Game</button>'+
+	'<button onclick = "openfiledialog();">Load Game</button>'+
+	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
+	
+	$("#menu").html(menucode);
+	
+	backgroundColorSelector = document.getElementById("colorpicker");
+}
+
+function openfiledialog(){
+	$("#inputfiledialog").click();
+}
+
+function setBackgroundColor(){
+	backgroundColor = backgroundColorSelector.value;
+	var style = "position: absolute; left: 0; top: 0; z-index: 0; background-color:"+ backgroundColor;
+	stage.setAttribute("style", style);
+}
+
+function deleteSelected(){
+	canvas.remove(canvas.getActiveObject());
+}
+
+function saveGame(){
+	state = JSON.stringify(canvas);
+	download(state, "test.txt", "text");
+}
+
+function loadFile(fileToRead){
+	var reader = new FileReader();
+	var fileToRead = document.querySelector('input').files[0];
+	reader.addEventListener("loadend", function() {
+	   loadGame(reader.result);
+	});
+	reader.readAsText(fileToRead);
+}
+
+function loadGame(inputJSON){
+	canvas.loadFromJSON(inputJSON, canvas.renderAll.bind(canvas));
+}
+
+function cloneSelected(){
+	canvas.getActiveObject().clone(function(cloned) {
+		Paste(cloned);
+	});
+}
+
+function addcard(){
+	menu.innerHTML += "<input id='cardurl'></input><button onclick = 'submitcard();'>Submit</button>";
+}
+
+
+function download(data, filename, type) {
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
+}
+
+function Copy() {
+	canvas.getActiveObject().clone(function(cloned) {
+		_clipboard = cloned;
+	});
+}
+
+function Paste(source) {
+	if (source == null){source = _clipboard}
+	// clone again, so you can do multiple copies.
+	source.clone(function(clonedObj) {
+		canvas.discardActiveObject();
+		clonedObj.set({
+			left: clonedObj.left + 10,
+			top: clonedObj.top + 10,
+			evented: true,
+		});
+		if (clonedObj.type === 'activeSelection') {
+			// active selection needs a reference to the canvas.
+			clonedObj.canvas = canvas;
+			clonedObj.forEachObject(function(obj) {
+				canvas.add(obj);
+			});
+			// this should solve the unselectability
+			clonedObj.setCoords();
+		} else {
+			canvas.add(clonedObj);
+		}
+		source.top += 10;
+		source.left += 10;
+		canvas.setActiveObject(clonedObj);
+		canvas.requestRenderAll();
+	});
+}
