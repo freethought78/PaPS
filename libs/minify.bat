@@ -1,1 +1,1 @@
-uglifyjs jquery-3.4.1.min.js fabric.min.js paps.js -o paps.min.js -c -m
+uglifyjs jquery-3.4.1.min.js fabric.min.js peerjs.js paps.js -o paps.min.js -c -m
