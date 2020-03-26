@@ -33,22 +33,15 @@ function post(data){
 }
 
 function synchronizeScenes(){
-	var statePacket = createStatePacket();
-	broadcast(statePacket,serverConnection);
+	window.requestAnimationFrame(function(){
+		var statePacket = createStatePacket();
+		broadcast(statePacket,serverConnection);
+	})
 }
 
 function createStatePacket(){
 	var statePacket = {type: "state", state:JSON.stringify(canvas), peerID: peer.id};
 	return statePacket;
-}
-
-//sends the local state of the board to the connected peer once
-function updateRemoteBoard(conn){
-	var statePacket = createStatePacket();
-	
-	// clients send board updates to the server, the server sends board updates to all clients.
-	// updates originating from non server clients still need to be rebroadcast by the server in the packet handler
-	broadcast(statePacket, conn);
 }
 
 // If this is the acting server loop through the list of connections in reverse, eliminating dead connections from the list
@@ -78,10 +71,6 @@ function updateRemotePeerLists(){
 	for (var currentPeer in connections){
 		connections[currentPeer].connection.send({type: "peerListUpdate", list: JSON.stringify(peerList)});
 	}
-}
-
-function requestBoardUpdate(serverConnection){
-	serverConnection.send({type: "requestBoardUpdate"});
 }
 
 //rebroadcast state changes to all clients except the sender
@@ -150,24 +139,19 @@ function registerConnectionHandlers(){
 				
 				//when a state message is recieved, update all pieces on the board
 				if(data.type == 'state'){
-					console.log(data.state);
-					var state = createStatePacket();
-					console.log(state.state);
-					if (state.state != data.state){
-						rebroadcast(data);
-						//populate local canvas with recieved data
-						canvas.loadFromJSON(data.state, canvas.renderAll.bind(canvas));
-					}
+					window.requestAnimationFrame(function(){
+						var state = createStatePacket();
+						if (state.state != data.state){
+							rebroadcast(data);
+							//populate local canvas with recieved data
+							canvas.loadFromJSON(data.state, canvas.renderAll.bind(canvas));
+						}
+					})
 				}
 				
 				// this packet is set from the server containing a list of connected peers
 				if(data.type == 'peerListUpdate'){
 					peerList = JSON.parse(data.list);
-				}
-				
-				// A client sends this packet to the server to get a board state update packet in return
-				if(data.type == "requestBoardUpdate"){
-					updateRemoteBoard(conn);
 				}
 				
 				// A connect packet is sent from the server to the clien list when a new client has connected to the server
@@ -186,7 +170,6 @@ function registerConnectionHandlers(){
 			if (engineStarted == false){
 				firstRun();
 				engineStarted = true;
-				requestBoardUpdate(conn);
 				//registerEnterKey(conn);
 			}
 			
