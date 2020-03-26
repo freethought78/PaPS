@@ -318,10 +318,7 @@ function initialize(){
 
 	addZoomListener();
 	addWindowResizeListener();
-	// whenever the canvas is modified, synchronize it across the network
-	canvas.on('object:added', synchronizeScenes);
-	canvas.on('object:removed', synchronizeScenes);
-	canvas.on('object:modified', synchronizeScenes);
+	addCanvasEventListeners();
 		
 	canvas.setZoom(zoom);
 	
@@ -335,6 +332,13 @@ function initialize(){
 	backgroundColorSelector = document.getElementById("colorpicker");
 	
 	setBackgroundColor();
+}
+
+function addCanvasEventListeners(){
+	// whenever the canvas is modified, synchronize it across the network
+	canvas.on('object:added', synchronizeScenes);
+	canvas.on('object:removed', synchronizeScenes);
+	canvas.on('object:modified', synchronizeScenes);
 }
 
 function loadScript(url, callback)
@@ -364,6 +368,11 @@ function addWindowResizeListener(){
 		
 
 		setBackgroundColor();
+		
+		// whenever the canvas is modified, synchronize it across the network
+		canvas.on('object:added', synchronizeScenes);
+		canvas.on('object:removed', synchronizeScenes);
+		canvas.on('object:modified', synchronizeScenes);
 	});
 }
 
