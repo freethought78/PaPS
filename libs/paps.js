@@ -128,7 +128,7 @@ function registerConnectionHandlers(){
 
 			
 			//Manage different types of network traffic
-			conn.on('data', async function(data){
+			conn.on('data', function(data){
 				//when a chat message is recieved, post it to the output
 				if(data.type == "chat"){
 					var sender = data.user;
