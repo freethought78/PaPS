@@ -33,10 +33,12 @@ function post(data){
 }
 
 function synchronizeScenes(){
-	window.requestAnimationFrame(function(){
-		var statePacket = createStatePacket();
-		broadcast(statePacket,serverConnection);
-	})
+	if (serverID!="disconnected"){
+		window.requestAnimationFrame(function(){
+			var statePacket = createStatePacket();
+			broadcast(statePacket,serverConnection);
+		})
+	}
 }
 
 function createStatePacket(){
@@ -129,6 +131,9 @@ function registerConnectionHandlers(){
 			
 			//Manage different types of network traffic
 			conn.on('data', function(data){
+				//alert the console when network traffic is recieved
+				console.log(data.type);
+				
 				//when a chat message is recieved, post it to the output
 				if(data.type == "chat"){
 					var sender = data.user;
@@ -144,7 +149,7 @@ function registerConnectionHandlers(){
 						if (state.state != data.state){
 							rebroadcast(data);
 							//populate local canvas with recieved data
-							canvas.loadFromJSON(data.state, canvas.renderAll.bind(canvas));
+							loadGame(data.state);
 						}
 					})
 				}
@@ -318,8 +323,9 @@ function initialize(){
 
 	addZoomListener();
 	addWindowResizeListener();
+	
 	addCanvasEventListeners();
-		
+			
 	canvas.setZoom(zoom);
 	
 	createMenu();	
@@ -357,6 +363,7 @@ function loadScript(url, callback)
     // Fire the loading
     head.appendChild(script);
 }
+
 	
 function addWindowResizeListener(){
 	$(window).resize(function(){
@@ -364,15 +371,13 @@ function addWindowResizeListener(){
 		$(".canvas-container").remove();
 		
 		canvas = createCanvas();
-		canvas.loadFromJSON(contents, canvas.renderAll.bind(canvas));
 		
+		loadGame(contents);
 
 		setBackgroundColor();
 		
-		// whenever the canvas is modified, synchronize it across the network
-		canvas.on('object:added', synchronizeScenes);
-		canvas.on('object:removed', synchronizeScenes);
-		canvas.on('object:modified', synchronizeScenes);
+		addCanvasEventListeners();
+
 	});
 }
 
@@ -393,7 +398,7 @@ function createCanvas(){
 	});
 	
 	stage = document.getElementById("c");
-	
+
 	return(canvas);
 }
 
@@ -492,12 +497,36 @@ function createMenu(){
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
 	'<button onclick = "openfiledialog();">Load Game</button>'+
+	'<button onclick = "rotateBoard();">Rotate Board</button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
 	
 	$("#menu").html(menucode);
 	
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
+
+function rotateBoard(){
+
+	var contents = JSON.stringify(canvas);
+	$(".canvas-container").remove();
+	
+	canvas = createCanvas();
+		
+
+	var context = canvas.getContext("2d");
+	context.translate (canvas.width / 2, canvas.height /2);
+	context.rotate(Math.PI);
+	context.translate (-(canvas.width / 2), -(canvas.height /2));
+	
+	loadGame(contents);
+	
+	setBackgroundColor();
+	
+	addCanvasEventListeners();
+
+}
+
+
 
 function openfiledialog(){
 	$("#inputfiledialog").click();
@@ -528,7 +557,17 @@ function loadFile(fileToRead){
 }
 
 function loadGame(inputJSON){
-	canvas.loadFromJSON(inputJSON, canvas.renderAll.bind(canvas));
+	canvas.loadFromJSON(inputJSON, function(){
+		//centerScene();
+	});
+
+}
+
+function centerScene(){
+	var group = new fabric.Group(canvas.getObjects())
+	canvas.centerObject(group)
+	group.setCoords()
+	canvas.renderAll.bind(canvas);
 }
 
 function cloneSelected(){
