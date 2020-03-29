@@ -55,7 +55,7 @@ function removeDeadConnections(){
 			if(connections[currentPeer].connection.open == false){
 				var name = connections[currentPeer].name;
 				var id = connections[currentPeer].id;
-				var disconnectPacket = {type: "droppedConnection", name: name, PeerID: id};
+				var disconnectPacket = {type: "droppedConnection", name: name, peerID: id};
 				post("-----"+name+" left the server-----");
 				broadcast(disconnectPacket);
 				connections.splice(currentPeer, 1);
