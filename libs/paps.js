@@ -241,6 +241,7 @@ function createMainMenu(){
 		'</div>'+
 		'</center>'
 	);
+	$("body").css("margin", 0);
 	
 	//Enter pressed inside nickname input is the same as pressing the submit button
 	$("#nameInput").on('keyup', function (e) {
@@ -336,7 +337,7 @@ function firstRun(){
 		"background-color": "black",
 		"opacity": 0.5,
 		"height": "200px",
-		"width": $(window).width(),
+		"width": $(window).width() - 10,
 		"padding": "5px"
 	});
 	
@@ -381,6 +382,34 @@ function firstRun(){
 	chatcontainer.appendChild(chatoutput);
 	chatcontainer.appendChild(chatinput);
 	document.body.appendChild(chatcontainer);
+	
+	//create user list window
+	var userlist = document.createElement("div");
+	
+	$(userlist).css({
+		"position": "absolute",
+		"left": $(window).width() - 10,
+		"z-index": 1,
+		"color": "white",
+		"background-color": "black",
+		"opacity": 0.5,
+		"height": "50%",
+		"width": 200,
+		"padding": "5px"
+	});
+	
+	$(userlist).mouseover(function(){
+		//$(chatcontainer).css("top", "");
+		$(userlist).animate({left: $(window).width() - $(userlist).width()-10}, 200);
+	});
+	
+	$(userlist).mouseleave(function(){
+		//$(chatcontainer).css("bottom", "");
+		$(userlist).animate({left: $(window).width() - 10}, 200);
+	});
+	
+	$(userlist).html("<center>Users:<BR><HR></center>");
+	document.body.appendChild(userlist);
 	
 	initialize();
 }
