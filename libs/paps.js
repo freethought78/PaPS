@@ -352,6 +352,17 @@ function firstRun(){
 		"resize": "none"
 	});
 	
+	$(chatinput).keyup(function(){
+		var key = window.event.keyCode;
+
+		// If the user has pressed enter
+		if (key === 13) {
+			// send the chat message
+			sendChatMessage($(chatinput).val());
+			$(chatinput).val("");
+		}
+	});
+	
 	$(chatcontainer).mouseover(function(){
 		//$(chatcontainer).css("top", "");
 		$(chatcontainer).animate({top: $(window).height() - $(chatcontainer).height()-10}, 200, "linear", function(){
@@ -363,7 +374,6 @@ function firstRun(){
 		//$(chatcontainer).css("bottom", "");
 		$(chatcontainer).animate({top: $(window).height() - 5}, 200);
 		$(chatinput).blur();
-		
 	});
 
 	$(chatoutput).html("test");
@@ -372,9 +382,11 @@ function firstRun(){
 	chatcontainer.appendChild(chatinput);
 	document.body.appendChild(chatcontainer);
 	
-	
-	
 	initialize();
+}
+
+function sendChatMessage(message){
+	$("#chatoutput").html($("#chatoutput").html()+"<br>"+message);
 }
 	
 function initialize(){
