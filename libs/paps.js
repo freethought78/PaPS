@@ -8,6 +8,7 @@
 	var backgroundColorSelector;
 	var keys;
 	var serverConnection;
+	var username;
 	
 	actingServer = "none";
 
@@ -29,7 +30,7 @@
 
 //new code starts here
 function post(data){
-	console.log(data);
+	$("#chatoutput").html($("#chatoutput").html()+"<br>"+data);
 }
 
 function synchronizeScenes(){
@@ -73,6 +74,16 @@ function updateRemotePeerLists(){
 	for (var currentPeer in connections){
 		connections[currentPeer].connection.send({type: "peerListUpdate", list: JSON.stringify(peerList)});
 	}
+	updateLocalPeerList(peerList);
+}
+
+function updateLocalPeerList(list){
+	var userlistcontents = "<center>Players:<br><hr>";
+	for(var currentName in list){
+		userlistcontents+=list[currentName]+"<BR>";
+	}
+	userlistcontents+="</center>";
+	$("#userlist").html(userlistcontents);
 }
 
 //rebroadcast state changes to all clients except the sender
@@ -157,6 +168,7 @@ function registerConnectionHandlers(){
 				// this packet is set from the server containing a list of connected peers
 				if(data.type == 'peerListUpdate'){
 					peerList = JSON.parse(data.list);
+					updateLocalPeerList(peerList);
 				}
 				
 				// A connect packet is sent from the server to the clien list when a new client has connected to the server
@@ -319,6 +331,46 @@ function firstRun(){
 	
 	$("body").html(body);
 	
+	if(serverID != "disconnected"){
+		addChat();
+		addUserList();
+	}
+	
+	initialize();
+}
+
+function addUserList(){
+	//create user list window
+	var userlist = document.createElement("div");
+	$(userlist).attr("id", "userlist");
+	
+	$(userlist).css({
+		"position": "absolute",
+		"left": $(window).width() - 10,
+		"z-index": 1,
+		"color": "white",
+		"background-color": "black",
+		"opacity": 0.5,
+		"height": "50%",
+		"width": 200,
+		"padding": "5px"
+	});
+	
+	$(userlist).mouseover(function(){
+		//$(chatcontainer).css("top", "");
+		$(userlist).animate({left: $(window).width() - $(userlist).width()-10}, 200);
+	});
+	
+	$(userlist).mouseleave(function(){
+		//$(chatcontainer).css("bottom", "");
+		$(userlist).animate({left: $(window).width() - 10}, 200);
+	});
+	
+	$(userlist).html("<center>Users:<BR><HR></center>");
+	document.body.appendChild(userlist);
+}
+
+function addChat(){
 	//create chat window
 	var chatcontainer = document.createElement("div");
 	var chatoutput = document.createElement("div");
@@ -359,7 +411,9 @@ function firstRun(){
 		// If the user has pressed enter
 		if (key === 13) {
 			// send the chat message
-			sendChatMessage($(chatinput).val());
+			var message = $(chatinput).val();
+			post(username+": "+message);
+			sendChatMessage(message);
 			$(chatinput).val("");
 		}
 	});
@@ -377,45 +431,14 @@ function firstRun(){
 		$(chatinput).blur();
 	});
 
-	$(chatoutput).html("test");
-	
 	chatcontainer.appendChild(chatoutput);
 	chatcontainer.appendChild(chatinput);
 	document.body.appendChild(chatcontainer);
-	
-	//create user list window
-	var userlist = document.createElement("div");
-	
-	$(userlist).css({
-		"position": "absolute",
-		"left": $(window).width() - 10,
-		"z-index": 1,
-		"color": "white",
-		"background-color": "black",
-		"opacity": 0.5,
-		"height": "50%",
-		"width": 200,
-		"padding": "5px"
-	});
-	
-	$(userlist).mouseover(function(){
-		//$(chatcontainer).css("top", "");
-		$(userlist).animate({left: $(window).width() - $(userlist).width()-10}, 200);
-	});
-	
-	$(userlist).mouseleave(function(){
-		//$(chatcontainer).css("bottom", "");
-		$(userlist).animate({left: $(window).width() - 10}, 200);
-	});
-	
-	$(userlist).html("<center>Users:<BR><HR></center>");
-	document.body.appendChild(userlist);
-	
-	initialize();
 }
 
 function sendChatMessage(message){
-	$("#chatoutput").html($("#chatoutput").html()+"<br>"+message);
+	var chatPacket = {type: "chat", message: message, peerID: peer.id, user: username};
+	broadcast(chatPacket, serverConnection);
 }
 	
 function initialize(){
