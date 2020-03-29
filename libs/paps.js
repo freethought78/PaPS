@@ -311,8 +311,69 @@ function firstRun(){
 	//replace contents of body with ingame view
 	var body = '<input id="inputfiledialog" type="file" style="position: fixed; top: -100em" onchange="loadFile(this.value)">'+
 	'<div id="menu" style="position: absolute; top: 0; left: 0; z-index: 1;"></div>';
-	$("body").css('margin', 0);
+	$("body").css({
+		'margin': 0,
+		'overflow': "hidden"
+	});
+	
 	$("body").html(body);
+	
+	//create chat window
+	var chatcontainer = document.createElement("div");
+	var chatoutput = document.createElement("div");
+	var chatinput = document.createElement("textarea");
+	
+	$(chatcontainer).attr("id", "chatcontainer");
+	$(chatoutput).attr("id", "chatoutput");
+	$(chatinput).attr("id", "chatinput");
+	
+	$(chatcontainer).css({
+		"position": "absolute",
+		//"bottom": "0px",
+		"top": $(window).height() - 5,
+		"z-index": 1,
+		"color": "white",
+		"background-color": "black",
+		"opacity": 0.5,
+		"height": "200px",
+		"width": $(window).width(),
+		"padding": "5px"
+	});
+	
+	$(chatoutput).css({
+		"height": "180px"
+	});
+	
+	$(chatinput).css({
+		"height": "20px",
+		"background-color": "white",
+		"color": "black",
+		"width": "100%",
+		"resize": "none"
+	});
+	
+	$(chatcontainer).mouseover(function(){
+		//$(chatcontainer).css("top", "");
+		$(chatcontainer).animate({top: $(window).height() - $(chatcontainer).height()-10}, 200, "linear", function(){
+			$(chatinput).focus();
+		});
+	});
+	
+	$(chatcontainer).mouseleave(function(){
+		//$(chatcontainer).css("bottom", "");
+		$(chatcontainer).animate({top: $(window).height() - 5}, 200);
+		$(chatinput).blur();
+		
+	});
+
+	$(chatoutput).html("test");
+	
+	chatcontainer.appendChild(chatoutput);
+	chatcontainer.appendChild(chatinput);
+	document.body.appendChild(chatcontainer);
+	
+	
+	
 	initialize();
 }
 	
@@ -385,7 +446,7 @@ function createCanvas(){
 	var height = $(window).height();
 	var width = $(window).width();
 
-	var canvascode = "<canvas id='c' width='"+width+"' height='"+height+"'></canvas>"
+	var canvascode = "<canvas id='c' width='"+width+"' height='"+height+"'></canvas>";
 
 	$("body").append(canvascode);
 	var canvas = new fabric.Canvas('c');
@@ -497,7 +558,7 @@ function createMenu(){
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
 	'<button onclick = "openfiledialog();">Load Game</button>'+
-	'<button onclick = "rotateBoard();">Rotate Board</button>'+
+	'<button onclick = "rotateBoard(90);">Rotate Board</button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
 	
 	$("#menu").html(menucode);
@@ -505,19 +566,16 @@ function createMenu(){
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
 
-function rotateBoard(){
+function rotateBoard(angle){
+	
+	var group = new fabric.Group(canvas.getObjects())
+	group.rotate(angle)
+	//canvas.centerObject(group)
+	group.setCoords()
+	canvas.renderAll()
 
 	var contents = JSON.stringify(canvas);
-	$(".canvas-container").remove();
-	
-	canvas = createCanvas();
-		
 
-	var context = canvas.getContext("2d");
-	context.translate (canvas.width / 2, canvas.height /2);
-	context.rotate(Math.PI);
-	context.translate (-(canvas.width / 2), -(canvas.height /2));
-	
 	loadGame(contents);
 	
 	setBackgroundColor();
@@ -558,7 +616,7 @@ function loadFile(fileToRead){
 
 function loadGame(inputJSON){
 	canvas.loadFromJSON(inputJSON, function(){
-		//centerScene();
+		//canvas.renderAll.bind(canvas);
 	});
 
 }
