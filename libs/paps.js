@@ -314,6 +314,8 @@ function interpretNetworkData(data){
 
 	//when a state message is recieved, update all pieces on the board
 	if(data.type == 'state'){
+		gamehistory.push(data.state);
+		currenthistoryposition = gamehistory.length - 1;
 		loadGame(data.state);
 		window.requestAnimationFrame(function(){
 			addKeyListener();	
@@ -545,9 +547,14 @@ function addCanvasEventListeners(){
 
 function addCurrentStateToHistoryandSync(){
 	window.requestAnimationFrame(function(){
-		gamehistory.push(JSON.stringify(canvas));
-		currenthistoryposition = gamehistory.length -1;
-		synchronizeScenes();
+		
+		var newdata = JSON.stringify(canvas);
+		var olddata = gamehistory[currenthistoryposition]
+		if ((newdata != olddata) /*&& (currenthistoryposition == gamehistory.length -2)*/){
+			gamehistory.push(newdata);
+			currenthistoryposition = gamehistory.length - 1;
+			synchronizeScenes();
+		}
 	});
 }
 
@@ -759,16 +766,26 @@ function createMenu(){
 function historyBack(){
 	currenthistoryposition --;
 	if(currenthistoryposition < 0){currenthistoryposition = 0}
-	loadGame(gamehistory[currenthistoryposition]);
-	//synchronizeScenes();
+	loadHistory(currenthistoryposition);
+	
 }
 
 function historyForward(){
 	var maxhistoryposition = gamehistory.length -1;
 	currenthistoryposition ++;
 	if(currenthistoryposition > maxhistoryposition){currenthistoryposition = maxhistoryposition}
-	loadGame(gamehistory[currenthistoryposition]);
-	//synchronizeScenes();
+	loadHistory(currenthistoryposition);
+	
+}
+
+function loadHistory(position){
+	if(position != gamehistory.length -1){
+		canvas.loadFromJSON(gamehistory[position], canvas.renderAll.bind(canvas), function(o, object) {
+			object.set('selectable', false);
+		})
+	} else {
+		loadGame(gamehistory[currenthistoryposition]);
+	}
 }
 
 function openfiledialog(){
