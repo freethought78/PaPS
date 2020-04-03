@@ -177,20 +177,25 @@ function addHostOrJoinControls(){
 function connect(connectiontype){
 	$("#connectbuttons").remove();
 	
+	var connectioncells = '<center><div id="leftcell" style="float:left; width:50%"></div>';
+	connectioncells += '<div id="rightcell" style="float:right; width:50%"></div></center>';
+	
 	if (connectiontype == "server"){
 		actingServer = true;
 		var serverhint = document.createElement("div");
 		$(serverhint).html("send this code to your friends,<BR>")
 		$(serverhint).append("wait for their response <br>and paste what they send back below");
 		$("#pageContent").append(serverhint);
+		
+		$("body").append(connectioncells)
 
 		var outgoing = document.createElement("pre");
 		$(outgoing).attr("id", "outgoing");
-		$("#pageContent").append(outgoing);
+		$("#leftcell").append(outgoing);
 			
 		var incoming = document.createElement("textarea");
 		$(incoming).attr("id", "incoming");
-		$("#pageContent").append(incoming);
+		$("#rightcell").append(incoming);
 		
 	}else{
 		actingServer = false;
@@ -200,25 +205,26 @@ function connect(connectiontype){
 		$(serverhint).append("paste it in the box below, click the button, and give your friend the response");
 		$("#pageContent").append(serverhint);
 		
+		$("#pageContent").append(connectioncells)
+		
 		var incoming = document.createElement("textarea");
 		$(incoming).attr("id", "incoming");
-		$("#pageContent").append(incoming);
+		$("#leftcell").append(incoming);
 		
 		var outgoing = document.createElement("pre");
 		$(outgoing).attr("id", "outgoing");
-		$("#pageContent").append(outgoing);
+		$("#rightcell").append(outgoing);
 	}
 	
 	$(outgoing).css({
-		"width": "600px",
+		"width": "100%",
 		"word-wrap": "break-word",
-		"white-space": "normal",
-		"width": "50%"
+		"white-space": "normal"
 	});
 	
 	$(incoming).css({
-		"width": "50%",
-		"height": "50%"
+		"width": "100%",
+		"height": "100%"
 	});			
 
 	
