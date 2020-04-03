@@ -368,7 +368,7 @@ function firstRun(){
 	window.onkeydown = function(e) { keys[e.keyCode] = true; }
 	
 	//replace contents of body with ingame view
-	var body = '<input id="inputfiledialog" type="file" style="position: fixed; top: -100em" onchange="loadFile(this.value)">'+
+	var body = '<input id="inputfiledialog" type="file" style="position: fixed; top: -100em">'+
 	'<div id="menu" style="position: absolute; top: 0; left: 0; z-index: 1;"></div>';
 	$("body").css({
 		'margin': 0,
@@ -505,6 +505,7 @@ function initialize(){
 
 	addZoomListener();
 	addWindowResizeListener();
+	addFileLoadListener();
 	
 	addCanvasEventListeners();
 			
@@ -520,6 +521,14 @@ function initialize(){
 	backgroundColorSelector = document.getElementById("colorpicker");
 	
 	setBackgroundColor();
+}
+
+function addFileLoadListener(){
+	$('input[type="file"]').change(function(e){
+        var fileName = e.target.files[0];
+        loadFile(fileName);
+		$("#inputfiledialog").val("");
+    });
 }
 
 function addCanvasEventListeners(){
