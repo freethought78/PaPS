@@ -546,7 +546,7 @@ function addCanvasEventListeners(){
 function addCurrentStateToHistoryandSync(){
 	window.requestAnimationFrame(function(){
 		gamehistory.push(JSON.stringify(canvas));
-		currenthistoryposition = gamehistory.length -1;
+		currenthistoryposition = gamehistory.length;
 		synchronizeScenes();
 	});
 }
@@ -760,15 +760,15 @@ function historyBack(){
 	currenthistoryposition --;
 	if(currenthistoryposition < 0){currenthistoryposition = 0}
 	loadGame(gamehistory[currenthistoryposition]);
-	//synchronizeScenes();
+	synchronizeScenes();
 }
 
 function historyForward(){
 	var maxhistoryposition = gamehistory.length -1;
 	currenthistoryposition ++;
 	if(currenthistoryposition > maxhistoryposition){currenthistoryposition = maxhistoryposition}
-	loadGame(gamehistory[currenthistoryposition]);
-	//synchronizeScenes();
+	if (gamehistory.length > 0){loadGame(gamehistory[currenthistoryposition])}
+	synchronizeScenes();
 }
 
 function openfiledialog(){
