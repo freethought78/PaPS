@@ -9,6 +9,7 @@
 	var keys;
 	var serverConnection;
 	var username;
+	var p;
 	
 	actingServer = "none";
 
@@ -37,13 +38,13 @@ function synchronizeScenes(){
 	if (serverID!="disconnected"){
 		window.requestAnimationFrame(function(){
 			var statePacket = createStatePacket();
-			broadcast(statePacket,serverConnection);
+			broadcast(statePacket);
 		})
 	}
 }
 
 function createStatePacket(){
-	var statePacket = {type: "state", state:JSON.stringify(canvas), peerID: peer.id};
+	var statePacket = {type: "state", state:JSON.stringify(canvas)};
 	return statePacket;
 }
 
@@ -72,7 +73,7 @@ function updateRemotePeerLists(){
 		peerList.push(connections[currentPeer].name);
 	}
 	for (var currentPeer in connections){
-		connections[currentPeer].connection.send({type: "peerListUpdate", list: JSON.stringify(peerList)});
+		connections[currentPeer].connection.send(JSON.stringify({type: "peerListUpdate", list: JSON.stringify(peerList)}));
 	}
 	updateLocalPeerList(peerList);
 }
@@ -90,151 +91,19 @@ function updateLocalPeerList(list){
 function rebroadcast(packet){
 	if(actingServer == true){
 		for(var currentPeer in connections){
-			if(packet.peerID != connections[currentPeer].id){
-				connections[currentPeer].connection.send(packet);
-			}
+			connections[currentPeer].connection.send(packet);
 		}
 	}
 }
 
-function broadcast(packet, conn){
+function broadcast(packet){
 	if (actingServer == false){
-		conn.send(packet);
+		p.send(JSON.stringify(packet));
 	}else{
-		rebroadcast(packet);
+		if (packet.type != "connection"){
+			rebroadcast(JSON.stringify(packet));
+		}
 	}
-}
-
-function connect(){
-	var targetIDinput = document.getElementById("targetIDinput");
-	var targetID = targetIDinput.value;
-	remote = targetID;
-	if(serverID == "disconnected"){serverID = remote};
-	conn = peer.connect(remote, {metadata: {name: username}});
-	serverConnection = conn;
-	actingServer = false;
-}
-
-function registerConnectionHandlers(){
-
-	peer.on('connection', function(conn) {
-		// If this is the first incoming connection, an no outgoing connections have been made yet, this is now the acting server
-		if(actingServer == "none"){actingServer = true};
-		
-		// Store nickname of incoming connection on either server or client
-		var remoteName = conn.metadata.name;
-		
-		//If we only have a one way connection, connect back to the peer
-		if (actingServer == true){
-			remote = conn.peer;
-			serverID = peer.id;
-			
-			conn = peer.connect(remote, {metadata: {name: username}});
-	} else {serverConnection = conn}
-		
-		conn.on('close', function(){
-			removeDeadConnections();
-		});
-		
-		// On successful connection:
-		conn.on('open', function() {
-
-			
-			//Manage different types of network traffic
-			conn.on('data', function(data){
-				//alert the console when network traffic is recieved
-				console.log(data.type);
-				
-				//when a chat message is recieved, post it to the output
-				if(data.type == "chat"){
-					var sender = data.user;
-					var message = data.message;
-					post(sender + ": " + message);
-					rebroadcast(data);
-				}
-				
-				//when a state message is recieved, update all pieces on the board
-				if(data.type == 'state'){
-					window.requestAnimationFrame(function(){
-						var state = createStatePacket();
-						if (state.state != data.state){
-							rebroadcast(data);
-							//populate local canvas with recieved data
-							loadGame(data.state);
-						}
-					})
-				}
-				
-				// this packet is set from the server containing a list of connected peers
-				if(data.type == 'peerListUpdate'){
-					peerList = JSON.parse(data.list);
-					updateLocalPeerList(peerList);
-				}
-				
-				// A connect packet is sent from the server to the clien list when a new client has connected to the server
-				if(data.type=="connect"){
-					post("-----"+data.name+" connected to the server-----");
-				}
-				
-				// A droppedConnection packet is sent from the server to the client list when a client has lost connections
-				if(data.type=='droppedConnection'){
-					post("-----"+data.name+" left the server-----");
-				}
-			});
-			
-		
-			//Start the 2d engine and load the scene using method from external file js/startengine.js
-			if (engineStarted == false){
-				firstRun();
-				engineStarted = true;
-				//registerEnterKey(conn);
-			}
-			
-			
-			//notify user that a connection was established
-			if (actingServer==true){
-				post("-----Incoming Connection from "+remoteName+"-----");
-				var connectionPacket = {type: "connect", name:remoteName, peerID:conn.peer};
-				broadcast(connectionPacket);
-			} else {
-				post ("-----Connected to "+remoteName+"'s server-----");
-			}
-			
-			// Sychronize scenes between peers
-			synchronizeScenes(conn);
-			
-			if (actingServer == true){
-				connections.push({name: remoteName, connection:conn, id:conn.peer});
-				updateRemotePeerLists();
-			}
-			
-		});
-		
-	});
-	
-
-}
-
-
-function createNetworkID(){
-	// the id of the connected peer. The initial connection is only one way.
-	// we use 'remote' to check for 2 way connection and only connect back once
-	remote="disconnected";
-	// serverID will hold the ID of the peer that will be treated as the serverID
-	// the server is the peer recieving incoming connections
-	serverID="disconnected";
-	
-	//§§§§§§§§§§-----------Create A Peer ID------------§§§§§§§§§§§§§§§§§
-	//Register as a Peer on the PeerJS cloud
-	peer = new Peer();
-
-	//When peer is registered, add the peer ID to the appropriate Div
-	peer.on('open', function(id) {
-		var idDiv = document.getElementById("idDiv");
-		idDiv.innerHTML += id;
-		peerID = peer.id;
-	});
-	registerConnectionHandlers();
 }
 
 function createMainMenu(){
@@ -270,6 +139,9 @@ function addConnectionDetails(){
 		//Replace name input with a static representation of users name	
 		replaceNameInput();
 		
+		addHostOrJoinControls();
+
+		/*
 		$("#pageContent").append(
 			'Your ID:'+
 			'<div id="idDiv"></div>'+
@@ -282,9 +154,10 @@ function addConnectionDetails(){
 			'<button id="connectButton" onclick="connect()">Connect</button><br>'+
 			'<hr>'
 		);
+		*/
 		
 		// create a PeerJS network id (located in js/networking.js)
-		createNetworkID();
+		//createNetworkID();
 	}
 	
 	//pressing enter on the target ID input will do the same as pressing connect
@@ -293,6 +166,169 @@ function addConnectionDetails(){
         connect();
     }
 });
+}
+
+function addHostOrJoinControls(){
+	var controlscode = '<div id="connectbuttons"><button onclick=connect("server")>Host Game</button>' +
+	'<button onclick=connect("client")>Join Game</button></div>'
+	$("#pageContent").append(controlscode);
+}
+
+function connect(connectiontype){
+	$("#connectbuttons").remove();
+	
+	if (connectiontype == "server"){
+		actingServer = true;
+		var serverhint = document.createElement("div");
+		$(serverhint).html("send this code to your friends,<BR>")
+		$(serverhint).append("wait for their response <br>and paste what they send back below");
+		$("#pageContent").append(serverhint);
+
+		var outgoing = document.createElement("pre");
+		$(outgoing).attr("id", "outgoing");
+		$("#pageContent").append(outgoing);
+			
+		var incoming = document.createElement("textarea");
+		$(incoming).attr("id", "incoming");
+		$("#pageContent").append(incoming);
+		
+	}else{
+		actingServer = false;
+		var serverhint = document.createElement("div");
+		$(serverhint).html("tell your friend to start a room<BR>")
+		$(serverhint).append("wait for them to send you their code<BR>");
+		$(serverhint).append("paste it in the box below, click the button, and give your friend the response");
+		$("#pageContent").append(serverhint);
+		
+		var incoming = document.createElement("textarea");
+		$(incoming).attr("id", "incoming");
+		$("#pageContent").append(incoming);
+		
+		var outgoing = document.createElement("pre");
+		$(outgoing).attr("id", "outgoing");
+		$("#pageContent").append(outgoing);
+	}
+	
+	$(outgoing).css({
+		"width": "600px",
+		"word-wrap": "break-word",
+		"white-space": "normal",
+		"width": "50%"
+	});
+	
+	$(incoming).css({
+		"width": "50%",
+		"height": "50%"
+	});			
+
+	
+	var submitbutton = document.createElement("button");
+	$(submitbutton).click(function(){submitrequest()});
+	$(submitbutton).html("Submit");
+	$(submitbutton).attr("id", "submitbutton");
+	$("#pageContent").append(submitbutton);
+	
+	p = new SimplePeer({
+		initiator: actingServer,
+		trickle: false
+	})
+
+	p.on('error', err => console.log('error', err))
+
+	p.on('signal', data => {
+		console.log('SIGNAL', JSON.stringify(data))
+		$('#outgoing').html(JSON.stringify(data));
+	})
+
+
+	p.on('connect', () => {
+		console.log('CONNECT')
+		p.send(JSON.stringify(createConnectionPacket()));
+		
+
+	})
+
+	p.on('data', data => {
+		console.log('data: ' + data)
+		interpretNetworkData(data);
+	})
+	
+
+}
+
+function createConnectionPacket(){
+	var data = {type: "connection", name: username};
+	return data;
+}
+
+function interpretNetworkData(data){
+	//console.log(data);
+	data=JSON.parse(data);
+//alert the console when network traffic is recieved
+	if(data.type == "connection"){
+		remoteName = data.name;
+		
+		//Start the 2d engine and load the scene using method from external file js/startengine.js
+		if (engineStarted == false){
+			serverID = "connected";
+			firstRun();
+			engineStarted = true;
+			//registerEnterKey(conn);
+		}
+		
+		
+		//notify user that a connection was established
+		if (actingServer==true){
+			post("-----Incoming Connection from "+remoteName+"-----");
+		} else {
+			post ("-----Connected to "+remoteName+"'s server-----");
+		}
+		
+		// Sychronize scenes between peers
+		synchronizeScenes();
+		
+		if (actingServer == true){
+			connections.push({name: remoteName, connection:p});
+			updateRemotePeerLists();
+		}
+	}
+
+	//when a chat message is recieved, post it to the output
+	if(data.type == "chat"){
+		var sender = data.user;
+		var message = data.message;
+		post(sender + ": " + message);
+	}
+
+	//when a state message is recieved, update all pieces on the board
+	if(data.type == 'state'){
+		loadGame(data.state);
+		window.requestAnimationFrame(function(){
+			addKeyListener();	
+		})
+		
+	}
+
+	// this packet is set from the server containing a list of connected peers
+	if(data.type == 'peerListUpdate'){
+		peerList = JSON.parse(data.list);
+		updateLocalPeerList(peerList);
+	}
+
+	// A connect packet is sent from the server to the clien list when a new client has connected to the server
+	if(data.type=="connect"){
+		post("-----"+data.name+" connected to the server-----");
+	}
+
+	// A droppedConnection packet is sent from the server to the client list when a client has lost connections
+	if(data.type=='droppedConnection'){
+		post("-----"+data.name+" left the server-----");
+	}
+}
+	 
+function submitrequest(){
+	$("#submitbutton").remove();
+	p.signal(JSON.parse(document.querySelector('#incoming').value))
 }
 
 function validateName(){
@@ -437,8 +473,8 @@ function addChat(){
 }
 
 function sendChatMessage(message){
-	var chatPacket = {type: "chat", message: message, peerID: peer.id, user: username};
-	broadcast(chatPacket, serverConnection);
+	var chatPacket = {type: "chat", message: message, user: username};
+	broadcast(chatPacket);
 }
 	
 function initialize(){
@@ -467,9 +503,11 @@ function initialize(){
 
 function addCanvasEventListeners(){
 	// whenever the canvas is modified, synchronize it across the network
-	canvas.on('object:added', synchronizeScenes);
-	canvas.on('object:removed', synchronizeScenes);
-	canvas.on('object:modified', synchronizeScenes);
+	//canvas.on('object:added', synchronizeScenes);
+	//canvas.on('object:removed', synchronizeScenes);
+	//canvas.on('object:modified', synchronizeScenes);
+	document.onmouseup = function(){synchronizeScenes()};
+	//addKeyListener();
 }
 
 function loadScript(url, callback)
@@ -553,7 +591,50 @@ function addZoomListener(){
 });
 	  
 	  
-	$(document).keypress(function(e) {
+	  
+
+	
+	addKeyListener();
+}
+
+function keyListener(e) {
+	zoom = canvas.getZoom();
+	var sensitivity = 0.01;
+	var adjusted = false;
+	if (e.which == 114){
+		zoom+=sensitivity;
+		adjusted = true;
+	}
+	if (e.which == 102){	
+		zoom-=sensitivity;
+		adjusted = true;
+	}
+	if (e.which == 97){
+		canvas.relativePan(new fabric.Point(10, 0));
+		adjusted = true;
+	}
+	if(e.which == 100){
+		canvas.relativePan(new fabric.Point(-10, 0));
+		adjusted = true;
+	}
+	if (e.which == 119){
+		canvas.relativePan(new fabric.Point(0, 10));
+		adjusted = true;
+	}
+	if(e.which == 115){
+		canvas.relativePan(new fabric.Point(0, -10));
+		adjusted = true;
+	}		
+	if (adjusted == true){
+		constrainZoom();
+		constrainViewport();
+		canvas.setZoom(zoom);
+		
+	};
+}
+	
+function addKeyListener(){
+	$(document).keypress(function(e){
 		zoom = canvas.getZoom();
 		var sensitivity = 0.01;
 		var adjusted = false;
@@ -584,12 +665,10 @@ function addZoomListener(){
 		if (adjusted == true){
 			constrainZoom();
 			constrainViewport();
-			canvas.setZoom(zoom);
-			
-		};
+			canvas.setZoom(zoom);	
+		}
 	});
 }
-
 function constrainZoom(){
 	if (zoom > 20) zoom = 20;
 	if (zoom < 0.01) zoom = 0.01;
@@ -674,6 +753,9 @@ function loadFile(fileToRead){
 	var fileToRead = document.querySelector('input').files[0];
 	reader.addEventListener("loadend", function() {
 	   loadGame(reader.result);
+	   window.requestAnimationFrame(function(){
+		   synchronizeScenes();
+	   })
 	});
 	reader.readAsText(fileToRead);
 }
@@ -682,7 +764,6 @@ function loadGame(inputJSON){
 	canvas.loadFromJSON(inputJSON, function(){
 		//canvas.renderAll.bind(canvas);
 	});
-
 }
 
 function centerScene(){
