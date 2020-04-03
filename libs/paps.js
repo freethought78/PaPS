@@ -11,6 +11,8 @@
 	var username;
 	var p;
 	var chathistory ="";
+	var gamehistory = [];
+	var currenthistoryposition = 0;
 	
 	actingServer = "none";
 
@@ -536,9 +538,19 @@ function addCanvasEventListeners(){
 	//canvas.on('object:added', synchronizeScenes);
 	//canvas.on('object:removed', synchronizeScenes);
 	//canvas.on('object:modified', synchronizeScenes);
-	document.onmouseup = function(){synchronizeScenes()};
+	canvas.on('mouse:up', addCurrentStateToHistoryandSync);
+	//$(".canvas-container").onmouseup = function(){addCurrentStateToHistoryandSync()};
 	//addKeyListener();
 }
+
+function addCurrentStateToHistoryandSync(){
+	window.requestAnimationFrame(function(){
+		gamehistory.push(JSON.stringify(canvas));
+		currenthistoryposition = gamehistory.length -1;
+		synchronizeScenes();
+	});
+}
+
 
 function loadScript(url, callback)
 {
@@ -735,7 +747,8 @@ function createMenu(){
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
 	'<button onclick = "openfiledialog();">Load Game</button>'+
-	'<button onclick = "rotateBoard(90);">Rotate Board</button>'+
+	'<button onclick = "historyBack()"><</button>'+
+	'<button onclick = "historyForward()">></button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
 	
 	$("#menu").html(menucode);
@@ -743,25 +756,20 @@ function createMenu(){
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
 
-function rotateBoard(angle){
-	
-	var group = new fabric.Group(canvas.getObjects())
-	group.rotate(angle)
-	//canvas.centerObject(group)
-	group.setCoords()
-	canvas.renderAll()
-
-	var contents = JSON.stringify(canvas);
-
-	loadGame(contents);
-	
-	setBackgroundColor();
-	
-	addCanvasEventListeners();
-
+function historyBack(){
+	currenthistoryposition --;
+	if(currenthistoryposition < 0){currenthistoryposition = 0}
+	loadGame(gamehistory[currenthistoryposition]);
+	synchronizeScenes();
 }
 
-
+function historyForward(){
+	var maxhistoryposition = gamehistory.length -1;
+	currenthistoryposition ++;
+	if(currenthistoryposition > maxhistoryposition){currenthistoryposition = maxhistoryposition}
+	loadGame(gamehistory[currenthistoryposition]);
+	synchronizeScenes();
+}
 
 function openfiledialog(){
 	$("#inputfiledialog").click();
@@ -788,7 +796,7 @@ function loadFile(fileToRead){
 	reader.addEventListener("loadend", function() {
 	   loadGame(reader.result);
 	   window.requestAnimationFrame(function(){
-		   synchronizeScenes();
+		   addCurrentStateToHistoryandSync();
 	   })
 	});
 	reader.readAsText(fileToRead);
