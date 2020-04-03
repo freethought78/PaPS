@@ -10,6 +10,7 @@
 	var serverConnection;
 	var username;
 	var p;
+	var chathistory ="";
 	
 	actingServer = "none";
 
@@ -18,7 +19,7 @@
 	connections = [];
 
 	// a list of the names of connected clients
-	peerList = [];
+	var peerList = [];
 
 	// keeps track of whether the engine has been started so we dont start it again every time a new connection is made to the server
 	var engineStarted = false;
@@ -31,7 +32,8 @@
 
 //new code starts here
 function post(data){
-	$("#chatoutput").html($("#chatoutput").html()+"<br>"+data);
+	chathistory += "<br>"+data
+	$("#chatoutput").html(chathistory);
 }
 
 function synchronizeScenes(){
@@ -78,10 +80,10 @@ function updateRemotePeerLists(){
 	updateLocalPeerList(peerList);
 }
 
-function updateLocalPeerList(list){
+function updateLocalPeerList(){
 	var userlistcontents = "<center>Players:<br><hr>";
-	for(var currentName in list){
-		userlistcontents+=list[currentName]+"<BR>";
+	for(var currentName in peerList){
+		userlistcontents+=peerList[currentName]+"<BR>";
 	}
 	userlistcontents+="</center>";
 	$("#userlist").html(userlistcontents);
@@ -304,6 +306,8 @@ function interpretNetworkData(data){
 		var sender = data.user;
 		var message = data.message;
 		post(sender + ": " + message);
+		$("#chatcontainer").css({"background-color": "orange"});
+
 	}
 
 	//when a state message is recieved, update all pieces on the board
@@ -318,7 +322,7 @@ function interpretNetworkData(data){
 	// this packet is set from the server containing a list of connected peers
 	if(data.type == 'peerListUpdate'){
 		peerList = JSON.parse(data.list);
-		updateLocalPeerList(peerList);
+		updateLocalPeerList();
 	}
 
 	// A connect packet is sent from the server to the clien list when a new client has connected to the server
@@ -383,12 +387,14 @@ function firstRun(){
 
 function addUserList(){
 	//create user list window
+	$("#userlist").remove();
 	var userlist = document.createElement("div");
 	$(userlist).attr("id", "userlist");
 	
 	$(userlist).css({
 		"position": "absolute",
 		"left": $(window).width() - 10,
+		"top": 0,
 		"z-index": 1,
 		"color": "white",
 		"background-color": "black",
@@ -398,7 +404,7 @@ function addUserList(){
 		"padding": "5px"
 	});
 	
-	$(userlist).mouseover(function(){
+	$(userlist).click(function(){
 		//$(chatcontainer).css("top", "");
 		$(userlist).animate({left: $(window).width() - $(userlist).width()-10}, 200);
 	});
@@ -410,9 +416,11 @@ function addUserList(){
 	
 	$(userlist).html("<center>Users:<BR><HR></center>");
 	document.body.appendChild(userlist);
+	updateLocalPeerList();
 }
 
 function addChat(){
+	$("#chatcontainer").remove();
 	//create chat window
 	var chatcontainer = document.createElement("div");
 	var chatoutput = document.createElement("div");
@@ -460,9 +468,10 @@ function addChat(){
 		}
 	});
 	
-	$(chatcontainer).mouseover(function(){
-		//$(chatcontainer).css("top", "");
-		$(chatcontainer).animate({top: $(window).height() - $(chatcontainer).height()-10}, 200, "linear", function(){
+	$(chatcontainer).click(function(){
+		$(chatcontainer).css({"background-color": "black"});
+		$(chatcontainer).animate({
+			top: $(window).height() - $(chatcontainer).height()-10}, 200, "linear", function(){
 			$(chatinput).focus();
 		});
 	});
@@ -472,10 +481,16 @@ function addChat(){
 		$(chatcontainer).animate({top: $(window).height() - 5}, 200);
 		$(chatinput).blur();
 	});
+	
+	
+	//light up chat when message recieved 
+	
 
 	chatcontainer.appendChild(chatoutput);
 	chatcontainer.appendChild(chatinput);
 	document.body.appendChild(chatcontainer);
+	
+	$("#chatoutput").html(chathistory);
 }
 
 function sendChatMessage(message){
@@ -546,6 +561,10 @@ function addWindowResizeListener(){
 		setBackgroundColor();
 		
 		addCanvasEventListeners();
+		
+		addChat();
+		
+		addUserList();
 
 	});
 }
