@@ -1,1 +1,1 @@
-uglifyjs jquery-3.4.1.min.js fabric.min.js simplepeer.min.js paps.js -o paps.min.js -c -m
+terser jquery-3.4.1.min.js fabric.min.js simplepeer.min.js paps.js -o paps.min.js -c -m

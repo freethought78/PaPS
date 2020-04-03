@@ -241,22 +241,22 @@ function connect(connectiontype){
 		trickle: false
 	})
 
-	p.on('error', err => console.log('error', err))
+	p.on('error', function(err){console.log('error', err)})
 
-	p.on('signal', data => {
+	p.on('signal', function(data){
 		console.log('SIGNAL', JSON.stringify(data))
 		$('#outgoing').html(JSON.stringify(data));
 	})
 
 
-	p.on('connect', () => {
+	p.on('connect', function(){
 		console.log('CONNECT')
 		p.send(JSON.stringify(createConnectionPacket()));
 		
 
 	})
 
-	p.on('data', data => {
+	p.on('data', function(data){
 		console.log('data: ' + data)
 		interpretNetworkData(data);
 	})
