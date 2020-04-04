@@ -144,24 +144,6 @@ function addConnectionDetails(){
 		replaceNameInput();
 		
 		addHostOrJoinControls();
-
-		/*
-		$("#pageContent").append(
-			'Your ID:'+
-			'<div id="idDiv"></div>'+
-
-			'Refresh the page to generate a new ID.'+
-			'<hr>'+
-			'<br>'+
-			"Enter your friend's ID and press connect:<br>"+
-			'<input id="targetIDinput">'+
-			'<button id="connectButton" onclick="connect()">Connect</button><br>'+
-			'<hr>'
-		);
-		*/
-		
-		// create a PeerJS network id (located in js/networking.js)
-		//createNetworkID();
 	}
 	
 	//pressing enter on the target ID input will do the same as pressing connect
@@ -316,6 +298,7 @@ function interpretNetworkData(data){
 	if(data.type == 'state'){
 		gamehistory.push(data.state);
 		currenthistoryposition = gamehistory.length - 1;
+		colorHistoryButtons();
 		loadGame(data.state);
 		window.requestAnimationFrame(function(){
 			addKeyListener();	
@@ -553,6 +536,7 @@ function addCurrentStateToHistoryandSync(){
 		if ((newdata != olddata) /*&& (currenthistoryposition == gamehistory.length -2)*/){
 			gamehistory.push(newdata);
 			currenthistoryposition = gamehistory.length - 1;
+			colorHistoryButtons();
 			synchronizeScenes();
 		}
 	});
@@ -754,18 +738,28 @@ function createMenu(){
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
 	'<button onclick = "openfiledialog();">Load Game</button>'+
-	'<button onclick = "historyBack()"><</button>'+
-	'<button onclick = "historyForward()">></button>'+
+	'<button id = "historyStart" onclick = "historyStart()" style="background:gray"><<</button>'+
+	'<button id = "historyBack" onclick = "historyBack()" style="background:gray"><</button>'+
+	'<button id = "historyForward" onclick = "historyForward()" style="background:gray">></button>'+
+	'<button id = "historyEnd" onclick = "historyEnd()" style="background:gray">>></button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
 	
 	$("#menu").html(menucode);
-	
 	backgroundColorSelector = document.getElementById("colorpicker");
+}
+
+function historyStart(){
+	currenthistoryposition = 0;
+	loadHistory(currenthistoryposition);
+	colorHistoryButtons();
 }
 
 function historyBack(){
 	currenthistoryposition --;
-	if(currenthistoryposition < 0){currenthistoryposition = 0}
+	if(currenthistoryposition <= 0){
+		currenthistoryposition = 0;
+	}
+	colorHistoryButtons();
 	loadHistory(currenthistoryposition);
 	
 }
@@ -773,9 +767,41 @@ function historyBack(){
 function historyForward(){
 	var maxhistoryposition = gamehistory.length -1;
 	currenthistoryposition ++;
-	if(currenthistoryposition > maxhistoryposition){currenthistoryposition = maxhistoryposition}
+	if(currenthistoryposition >= maxhistoryposition){
+		currenthistoryposition = maxhistoryposition;
+	}
+	colorHistoryButtons();
 	loadHistory(currenthistoryposition);
 	
+}
+
+function historyEnd(){
+	currenthistoryposition = gamehistory.length - 1;
+	loadHistory(currenthistoryposition);
+	colorHistoryButtons()
+}
+
+function colorHistoryButtons(){
+	if (currenthistoryposition == 0 ){
+		$("#historyStart").css({"background-color": "gray"})
+		$("#historyBack").css({"background-color": "gray"})
+	}else{
+		$("#historyBack").css({"background-color": "green"})
+		$("#historyStart").css({"background-color": "green"})
+	}
+	if (currenthistoryposition == gamehistory.length - 1){
+		$("#historyForward").css({"background-color": "gray"})
+		$("#historyEnd").css({"background-color": "gray"})
+	}else{
+		$("#historyForward").css({"background-color": "green"})
+		$("#historyEnd").css({"background-color": "green"})
+	}
+	if (currenthistoryposition < gamehistory.length - 1 && currenthistoryposition >0){
+		$("#historyStart").css({"background-color": "green"})
+		$("#historyBack").css({"background-color": "green"})
+		$("#historyForward").css({"background-color": "green"})
+		$("#historyEnd").css({"background-color": "green"})
+	}
 }
 
 function loadHistory(position){
