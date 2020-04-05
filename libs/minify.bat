@@ -1,1 +1,1 @@
-terser jquery-3.4.1.min.js fabric.min.js simplepeer.min.js paps.js -o paps.min.js -c -m
+terser papslogo.js jquery-3.4.1.min.js fabric.min.js simplepeer.min.js paps.js -o paps.min.js -c -m toplevel=true,eval=true

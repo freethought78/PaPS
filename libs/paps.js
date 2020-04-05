@@ -115,8 +115,9 @@ function createMainMenu(){
 		'<button style="position:absolute; background-color:green" onclick="startSinglePlayer()">Single Player</button>'+
 		'<center>'+
 		'<div id="pageContent">'+
-		'<div style="background-color: #57B; color: #222;"><span style="font-size:3em;">PaPS</span><br>'+
-		'Print and Play Simulator</div><br>'+
+		'<div style="background-color: #57B;">'+
+		'<img height = "20%" src="'+papslogo+'"><br>'+
+		'<img height = "5%" src="'+papslogotext+'"></div>'+
 		'Your Nickname:<br>'+
 		'<div id="nameInputDiv">'+
 		'<input id="nameInput"><br>'+
