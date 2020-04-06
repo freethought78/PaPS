@@ -566,6 +566,15 @@ function addWindowResizeListener(){
 	$(window).resize(function(){
 		var height = $(window).height();
 		var width = $(window).width();
+		canvas.setDimensions({
+			width: width,
+			height: height
+		})
+		if(serverID != "disconnected"){
+			addChat();
+			addUserList();
+		}
+		
 	});
 }
 
@@ -712,12 +721,14 @@ function constrainViewport(){
 }	
 
 function createMenu(){
-	var menucode = '<button onclick = "addcard();">New Card</button>'+
+	var menucode = '<button onclick = "addcard();">New Image</button>'+
 	'<button onclick = "addDeck();">New Deck</button>'+
 	'<button onclick = "cloneSelected();">Clone</button>'+
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
 	'<button onclick = "openfiledialog();">Load Game</button>'+
+	'<button onclick = "lockObject();">Glue to Table</button>'+
+	'<button onclick = "bringToFront();">Bring to Front</button>'+
 	'<button id = "historyStart" onclick = "historyStart()" style="background:gray"><<</button>'+
 	'<button id = "historyBack" onclick = "historyBack()" style="background:gray"><</button>'+
 	'<button id = "historyForward" onclick = "historyForward()" style="background:gray">></button>'+
@@ -726,6 +737,29 @@ function createMenu(){
 	
 	$("#menu").html(menucode);
 	backgroundColorSelector = document.getElementById("colorpicker");
+}
+function lockObject(){
+	var selection = canvas.getActiveObjects();
+	if(window.confirm("Caution, Gluing this object to the table will make it unselectable and unmovable. It will also put it underneath everything else. This is usually a good option for game boards. If you use the glue in a live game, it wont stick. Glue stuff in solo mode and save, then it will work in multiplayer.")){
+		for (target in selection){
+			selection[target].lockMovementX = true;
+			selection[target].lockMovementY = true
+			selection[target].sendToBack();
+			selection[target].selectable = false;
+			canvas.discardActiveObject().renderAll();
+			window.requestAnimationFrame(function(){
+				addCurrentStateToHistoryandSync();	
+			});
+		}
+	}
+
+}
+
+function bringToFront(){
+	var selection = canvas.getActiveObjects();
+	for (target in selection){
+		selection[target].bringToFront();
+	}
 }
 
 function historyStart(){
