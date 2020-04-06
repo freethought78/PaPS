@@ -603,16 +603,7 @@ function createCanvas(){
 	return(canvas);
 }
 
-function submitcard(url){
-	if (url==null){
-		url = document.getElementById("cardurl").value;
-	}
-	fabric.Image.fromURL(url, function(img) {
-	  img.scale(0.3);
-	  canvas.add(img).setActiveObject(img);
-	});
-	createMenu();
-}
+
 
 
 function addZoomListener(){
@@ -734,7 +725,8 @@ function constrainViewport(){
 }	
 
 function createMenu(){
-	var menucode = '<button onclick = "addcard();">Add Card</button>'+
+	var menucode = '<button onclick = "addcard();">New Card</button>'+
+	'<button onclick = "addDeck();">New Deck</button>'+
 	'<button onclick = "cloneSelected();">Clone</button>'+
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
@@ -867,6 +859,52 @@ function cloneSelected(){
 
 function addcard(){
 	menu.innerHTML += "<input id='cardurl'></input><button onclick = 'submitcard();'>Submit</button>";
+}
+
+function addDeck(){
+	menu.innerHTML += "<input id='deckurl'></input><button onclick = 'createDeck();'>Submit</button>";
+}
+
+function submitcard(url){
+	if (url==null){
+		url = document.getElementById("cardurl").value;
+	}
+	fabric.Image.fromURL(url, function(img) {
+	  img.scale(0.3);
+	  canvas.add(img).setActiveObject(img);
+	});
+	createMenu();
+}
+
+function createDeck(){
+	var backimage = $("#deckurl").val();
+	var newdeck;
+	
+	fabric.Image.fromURL(backimage, function(img) {
+	  var img1 = img.scale(0.3).set({ left: 12, top: 12 });
+	
+		fabric.Image.fromURL(backimage, function(img) {
+		  var img1 = img.scale(0.3).set({ left: 9, top: 9 });
+
+		  fabric.Image.fromURL(backimage, function(img) {
+			var img2 = img.scale(0.3).set({ left: 6, top: 6 });
+
+			fabric.Image.fromURL(backimage, function(img) {
+			  var img3 = img.scale(0.3).set({ left: 3, top: 3 });
+			  
+			  fabric.Image.fromURL(backimage, function(img) {
+				var img4 = img.scale(0.3).set({ left: 0, top: 0 });
+			  
+			  newdeck = new fabric.Group([ img1, img2, img3, img4], { left: 0, top: 0 });
+
+			  canvas.add(newdeck).setActiveObject(newdeck);
+			  });
+			});
+		  });
+		});
+	});
+	createMenu();
+	return newdeck;
 }
 
 
