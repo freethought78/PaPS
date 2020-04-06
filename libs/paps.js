@@ -564,21 +564,8 @@ function loadScript(url, callback)
 	
 function addWindowResizeListener(){
 	$(window).resize(function(){
-		var contents = JSON.stringify(canvas);
-		$(".canvas-container").remove();
-		
-		canvas = createCanvas();
-		
-		loadGame(contents);
-
-		setBackgroundColor();
-		
-		addCanvasEventListeners();
-		
-		addChat();
-		
-		addUserList();
-
+		var height = $(window).height();
+		var width = $(window).width();
 	});
 }
 
@@ -818,8 +805,17 @@ function setBackgroundColor(){
 }
 
 function deleteSelected(){
-	canvas.remove(canvas.getActiveObject());
+  var activeObject = canvas.getActiveObjects();
+  if (activeObject) {
+    activeObject.forEach(function(object) {
+      canvas.remove(object);
+    });
+    canvas.discardActiveObject();
+  }
+  canvas.renderAll();
 }
+		
+
 
 function saveGame(){
 	state = JSON.stringify(canvas);
@@ -890,14 +886,22 @@ function createDeck(){
 			var img2 = img.scale(0.3).set({ left: 6, top: 6 });
 
 			fabric.Image.fromURL(backimage, function(img) {
-			  var img3 = img.scale(0.3).set({ left: 3, top: 3 });
-			  
-			  fabric.Image.fromURL(backimage, function(img) {
-				var img4 = img.scale(0.3).set({ left: 0, top: 0 });
-			  
-			  newdeck = new fabric.Group([ img1, img2, img3, img4], { left: 0, top: 0 });
+				var img3 = img.scale(0.3).set({ left: 3, top: 3 });
 
+				fabric.Image.fromURL(backimage, function(img) {
+				var img4 = img.scale(0.3).set({ left: 0, top: 0 });
+
+				newdeck = new fabric.Group([ img1, img2, img3, img4], { left: 0, top: 0 });
+				var selected = canvas.getActiveObjects();
+				addDeckToImage(newdeck);
+				if(window.confirm("There are "+selected.length+" objects selected. Add these to the deck?")){
+					newdeck.deck=selected;
+				}else{
+					newdeck.deck=[];
+				}
+				deleteSelected();
 			  canvas.add(newdeck).setActiveObject(newdeck);
+			  addCurrentStateToHistoryandSync();
 			  });
 			});
 		  });
@@ -905,6 +909,16 @@ function createDeck(){
 	});
 	createMenu();
 	return newdeck;
+}
+
+function addDeckToImage(newdeck){
+	newdeck.toObject = (function(toObject) {
+	  return function() {
+		return fabric.util.object.extend(toObject.call(newdeck), {
+		  deck: newdeck.deck
+		});
+	  };
+	})(newdeck.toObject);
 }
 
 
