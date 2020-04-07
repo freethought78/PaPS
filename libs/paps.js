@@ -723,6 +723,7 @@ function constrainViewport(){
 function createMenu(){
 	var menucode = '<button onclick = "addcard();">New Image</button>'+
 	'<button onclick = "addDeck();">New Deck</button>'+
+	'<button onclick = "flip();">Flip</button>'+
 	'<button onclick = "cloneSelected();">Clone</button>'+
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
@@ -740,6 +741,38 @@ function createMenu(){
 	
 	$("#menu").html(menucode);
 	backgroundColorSelector = document.getElementById("colorpicker");
+}
+
+function flip(){
+	selection = canvas.getActiveObjects();
+	for (item in selection){
+		var card = selection[item];
+		var backcolor = new fabric.Rect({ 
+			width: card.getScaledWidth(), 
+			height: card.getScaledHeight(), 
+			fill: '#FFF',
+		})
+		fabric.Image.fromURL(papslogo, function(img) {
+			
+			const widthFactor = card.getScaledWidth() / img.width
+			const heightFactor = card.getScaledHeight() / img.height
+			const minFactor = Math.min(widthFactor, heightFactor)
+			img.scale(minFactor)
+			if(minFactor == heightFactor){
+				img.left= ((img.width*minFactor / 2) - card.width*minFactor / 2)/2;
+			}else{
+				img.top= ((img.height*minFactor / 2) - card.height*minFactor / 2)/2;
+			}
+			
+			//img.height = card.getScaledHeight();
+			//img.width = card.getScaledWidth();
+			var group = new fabric.Group([backcolor, img], {top: card.top, left: card.left})
+			canvas.add(group).setActiveObject(group);
+			canvas.remove(card)
+			canvas.renderAll.bind(canvas)
+			addCurrentStateToHistoryandSync();
+		})
+	}
 }
 
 function fullscreen(){
