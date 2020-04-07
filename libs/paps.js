@@ -747,27 +747,21 @@ function flip(){
 	selection = canvas.getActiveObjects();
 	for (item in selection){
 		var card = selection[item];
-		var backcolor = new fabric.Rect({ 
-			width: card.getScaledWidth(), 
-			height: card.getScaledHeight(), 
-			fill: '#FFF',
-		})
-		fabric.Image.fromURL(papslogo, function(img) {
+		var backimage;
+		if (card.backimage){
+			backimage = card.backimage;
+		}else{
+			backimage = "http://clipart-library.com/images/8cEbeEMLi.png";
+		}
+		
+		fabric.Image.fromURL(backimage, function(img) {
 			
-			const widthFactor = card.getScaledWidth() / img.width
-			const heightFactor = card.getScaledHeight() / img.height
-			const minFactor = Math.min(widthFactor, heightFactor)
-			img.scale(minFactor)
-			if(minFactor == heightFactor){
-				img.left= ((img.width*minFactor / 2) - card.width*minFactor / 2)/2;
-			}else{
-				img.top= ((img.height*minFactor / 2) - card.height*minFactor / 2)/2;
-			}
-			
-			//img.height = card.getScaledHeight();
-			//img.width = card.getScaledWidth();
-			var group = new fabric.Group([backcolor, img], {top: card.top, left: card.left})
-			canvas.add(group).setActiveObject(group);
+			img.scaleX = card.getScaledWidth() / img.width
+			img.scaleY = card.getScaledHeight() / img.height
+			img.top = card.top;
+			img.left = card.left;
+			canvas.add(img).setActiveObject(img);
+			addBackImageToCard(img, card.getSrc());
 			canvas.remove(card)
 			canvas.renderAll.bind(canvas)
 			addCurrentStateToHistoryandSync();
@@ -995,6 +989,7 @@ function submitcard(url){
 	fabric.Image.fromURL(url, function(img) {
 	  img.scale(0.3);
 	  canvas.add(img).setActiveObject(img);
+	  addBackImageToCard(img, "http://clipart-library.com/images/8cEbeEMLi.png");
 	});
 	createMenu();
 }
@@ -1048,6 +1043,16 @@ function addDeckToImage(newdeck){
 	})(newdeck.toObject);
 }
 
+function addBackImageToCard(card, newimage){
+	card.backimage=newimage;
+	card.toObject = (function(toObject) {
+	  return function() {
+		return fabric.util.object.extend(toObject.call(card), {
+		  backimage: newimage
+		});
+	  };
+	})(card.toObject);
+}
 
 function download(data, filename, type) {
     var file = new Blob([data], {type: type});
