@@ -727,22 +727,60 @@ function createMenu(){
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
 	'<button onclick = "openfiledialog();">Load Game</button>'+
-	'<button onclick = "lockObject();">Glue to Table</button>'+
+	'<button onclick = "glueObject();">Glue to Table</button>'+
+	'<button onclick = "lockObject();">Lock</button>'+
+	'<button onclick = "unlockObject();">Unlock</button>'+
 	'<button onclick = "bringToFront();">Bring to Front</button>'+
 	'<button id = "historyStart" onclick = "historyStart()" style="background:gray"><<</button>'+
 	'<button id = "historyBack" onclick = "historyBack()" style="background:gray"><</button>'+
 	'<button id = "historyForward" onclick = "historyForward()" style="background:gray">></button>'+
 	'<button id = "historyEnd" onclick = "historyEnd()" style="background:gray">>></button>'+
-	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">';
+	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">'+
+	'<button onclick = "fullscreen();">Full Screen</button>';
 	
 	$("#menu").html(menucode);
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
-function lockObject(){
+
+function fullscreen(){
+	if (document.fullscreenElement) {
+		closeFullscreen();
+	} else {
+		openFullscreen();
+	}
+}
+
+function openFullscreen() {
+	var elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}
+
+function closeFullscreen() {
+	var elem = document.documentElement;
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.mozCancelFullScreen) { /* Firefox */
+    document.mozCancelFullScreen();
+  } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) { /* IE/Edge */
+    document.msExitFullscreen();
+  }
+}
+
+function glueObject(){
 	var selection = canvas.getActiveObjects();
 	if(window.confirm("Caution, Gluing this object to the table will make it unselectable and unmovable. It will also put it underneath everything else. This is usually a good option for game boards. If you use the glue in a live game, it wont stick. Glue stuff in solo mode and save, then it will work in multiplayer.")){
 		for (target in selection){
-			selection[target].lockMovementX = true;
+			selection[target].lockMovementX = true
 			selection[target].lockMovementY = true
 			selection[target].sendToBack();
 			selection[target].selectable = false;
@@ -753,6 +791,28 @@ function lockObject(){
 		}
 	}
 
+}
+
+function lockObject(){
+	var selection = canvas.getActiveObjects();
+	for (target in selection){
+		selection[target].lockMovementX = true
+		selection[target].lockMovementY = true
+		window.requestAnimationFrame(function(){
+			addCurrentStateToHistoryandSync();	
+		});
+	}
+}
+
+function unlockObject(){
+	var selection = canvas.getActiveObjects();
+	for (target in selection){
+		selection[target].lockMovementX = false
+		selection[target].lockMovementY = false
+		window.requestAnimationFrame(function(){
+			addCurrentStateToHistoryandSync();	
+		});
+	}
 }
 
 function bringToFront(){
