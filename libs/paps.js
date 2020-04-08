@@ -610,18 +610,19 @@ function createCanvas(){
 				if(objectsContainingPoint[card].deck){
 					selection = canvas.getActiveObjects();
 					for (currentimage in selection){
-						if(selection[currentimage].src == defaultbackimage){
-							var newcard = selection[currentimage].backimage;
-						}else{
-							var newcard = selection[currentimage].src;
+						if(!selection[currentimage].deck){
+							if(selection[currentimage].src == defaultbackimage){
+								var newcard = selection[currentimage].backimage;
+							}else{
+								var newcard = selection[currentimage].src;
+							}
+							objectsContainingPoint[card].deck.push(newcard);
+							canvas.remove(selection[currentimage]);
 						}
-						objectsContainingPoint[card].deck.push(newcard);
-						canvas.remove(selection[currentimage]);
 					}
 				}
 			  }
 		  }
-		  
 	})
 	
 	
@@ -1095,6 +1096,13 @@ function addDeckToImage(newdeck){
 		});
 	  };
 	})(newdeck.toObject);
+	/*
+	newdeck.on("click", function(){
+		var newcard = newdeck.deck.pop();
+		sumbitcard(newcard.src, newcard.backimage);		
+	})
+	*/
+	
 }
 
 function addBackImageToCard(card, newimage){
