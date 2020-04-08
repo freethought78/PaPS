@@ -769,6 +769,8 @@ function flip(){
 	}
 }
 
+
+
 function fullscreen(){
 	if (document.fullscreenElement) {
 		closeFullscreen();
@@ -805,19 +807,27 @@ function closeFullscreen() {
 
 function glueObject(){
 	var selection = canvas.getActiveObjects();
-	if(window.confirm("Caution, Gluing this object to the table will make it unselectable and unmovable. It will also put it underneath everything else. This is usually a good option for game boards. If you use the glue in a live game, it wont stick. Glue stuff in solo mode and save, then it will work in multiplayer.")){
+	if(window.confirm("Caution, Gluing this object to the table will make it unselectable and unmovable. It will also put it underneath everything else. This is usually a good option for game boards.")){
 		for (target in selection){
 			selection[target].lockMovementX = true
 			selection[target].lockMovementY = true
 			selection[target].sendToBack();
 			selection[target].selectable = false;
 			canvas.discardActiveObject().renderAll();
+			selection[target].toObject = (function(toObject) {
+				return function() {
+					return fabric.util.object.extend(toObject.call(selection[target]), {
+					  lockMovementX: true,
+					  lockMovementY: true,
+					  selectable: false
+					});
+				};
+			})(selection[target].toObject);
 			window.requestAnimationFrame(function(){
 				addCurrentStateToHistoryandSync();	
-			});
+			})
 		}
 	}
-
 }
 
 function lockObject(){
@@ -825,6 +835,14 @@ function lockObject(){
 	for (target in selection){
 		selection[target].lockMovementX = true
 		selection[target].lockMovementY = true
+		selection[target].toObject = (function(toObject) {
+			return function() {
+				return fabric.util.object.extend(toObject.call(selection[target]), {
+				  lockMovementX: true,
+				  lockMovementY: true
+			});
+		};
+	})(selection[target].toObject);
 		window.requestAnimationFrame(function(){
 			addCurrentStateToHistoryandSync();	
 		});
