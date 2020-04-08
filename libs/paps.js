@@ -1039,10 +1039,10 @@ function submitcard(url, backimage, deck){
 	}
 	if(deck && !backimage){
 		backimage = deck.item(0).getSrc();
-	}
+	}/*
 	if (!backimage){
 		backimage = "http://clipart-library.com/images/8cEbeEMLi.png";
-	}
+	}*/
 	fabric.Image.fromURL(url, function(img) {
 	  img.scale(0.3);
 	  canvas.add(img)//.setActiveObject(img);
@@ -1114,7 +1114,13 @@ function addDeckToImage(newdeck){
 	newdeck.on("mouseup", function(){
 		if (newdeck.deck.length > 0){
 			var newcard = newdeck.deck.pop();
-			submitcard(newcard.getSrc(), newcard.backimage, newdeck);
+			var backimage;
+			if (!newcard.backimage){
+				backimage = newdeck.item(0).getSrc();
+			} else {
+				backimage = newcard.backimage;
+			}
+			submitcard(newcard.getSrc(), backimage, newdeck);
 		}
 	})
 	
