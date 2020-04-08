@@ -13,6 +13,7 @@
 	var chathistory ="";
 	var gamehistory = [];
 	var currenthistoryposition = 0;
+	var defaultbackimage = "http://clipart-library.com/images/8cEbeEMLi.png";
 	
 	actingServer = "none";
 
@@ -595,12 +596,41 @@ function createCanvas(){
 	});
 	
 	stage = document.getElementById("c");
+	fabric.util.addListener(canvas.upperCanvasEl, "mouseup", function (e) {
+		var _mouse = canvas.getPointer(e);
+		  if (e.target) {
+			var _targets = canvas.getObjects().filter(function (_obj) {
+			  return _obj.containsPoint(_mouse);
+
+			});
+			console.log(_targets);	
+			var objectsContainingPoint = _targets;
+			for (card in objectsContainingPoint){
+				 console.log("test");
+				if(objectsContainingPoint[card].deck){
+					selection = canvas.getActiveObjects();
+					for (currentimage in selection){
+						if(selection[currentimage].src == defaultbackimage){
+							var newcard = selection[currentimage].backimage;
+						}else{
+							var newcard = selection[currentimage].src;
+						}
+						objectsContainingPoint[card].deck.push(newcard);
+						canvas.remove(selection[currentimage]);
+					}
+				}
+			  }
+		  }
+		  
+	})
+	
+	
 
 	return(canvas);
 }
+/*
 
-
-
+*/
 
 function addZoomListener(){
 	canvas.on('mouse:wheel', function(opt) {
@@ -751,7 +781,7 @@ function flip(){
 		if (card.backimage){
 			backimage = card.backimage;
 		}else{
-			backimage = "http://clipart-library.com/images/8cEbeEMLi.png";
+			backimage = defaultbackimage
 		}
 		
 		fabric.Image.fromURL(backimage, function(img) {
@@ -1000,14 +1030,17 @@ function addDeck(){
 	menu.innerHTML += "<input id='deckurl'></input><button onclick = 'createDeck();'>Submit</button>";
 }
 
-function submitcard(url){
+function submitcard(url, backimage){
 	if (url==null){
 		url = document.getElementById("cardurl").value;
+	}
+	if (backimage == null){
+		backimage = "http://clipart-library.com/images/8cEbeEMLi.png";
 	}
 	fabric.Image.fromURL(url, function(img) {
 	  img.scale(0.3);
 	  canvas.add(img).setActiveObject(img);
-	  addBackImageToCard(img, "http://clipart-library.com/images/8cEbeEMLi.png");
+	  addBackImageToCard(img, backimage);
 	});
 	createMenu();
 }
@@ -1040,8 +1073,11 @@ function createDeck(){
 					newdeck.deck=[];
 				}
 				deleteSelected();
-			  canvas.add(newdeck).setActiveObject(newdeck);
-			  addCurrentStateToHistoryandSync();
+				
+				
+				
+				canvas.add(newdeck).setActiveObject(newdeck);
+				addCurrentStateToHistoryandSync();
 			  });
 			});
 		  });
