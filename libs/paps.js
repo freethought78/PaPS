@@ -1045,11 +1045,13 @@ function submitcard(url, backimage, deck){
 	}
 	fabric.Image.fromURL(url, function(img) {
 	  img.scale(0.3);
-	  canvas.add(img).setActiveObject(img);
+	  canvas.add(img)//.setActiveObject(img);
 	  addBackImageToCard(img, backimage);
 	  if(deck){
 		img.top = deck.top;
-		img.left = deck.left+deck.width;
+		img.left = deck.left+deck.width*deck.scaleX;
+		img.scaleX = (deck.item(0).getScaledWidth() / img.width) * deck.scaleX;
+		img.scaleY = (deck.item(0).getScaledHeight() / img.height) *deck.scaleY
 		img.setCoords();
 	  }
 	});
