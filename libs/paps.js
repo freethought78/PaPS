@@ -611,11 +611,14 @@ function createCanvas(){
 					selection = canvas.getActiveObjects();
 					for (currentimage in selection){
 						if(!selection[currentimage].deck){
+							/*
 							if(selection[currentimage].src == defaultbackimage){
 								var newcard = selection[currentimage].backimage;
 							}else{
 								var newcard = selection[currentimage].src;
 							}
+							*/
+							newcard = selection[currentimage];
 							objectsContainingPoint[card].deck.push(newcard);
 							canvas.remove(selection[currentimage]);
 						}
@@ -791,10 +794,9 @@ function flip(){
 			img.scaleY = card.getScaledHeight() / img.height
 			img.top = card.top;
 			img.left = card.left;
-			canvas.add(img).setActiveObject(img);
 			addBackImageToCard(img, card.getSrc());
+			canvas.add(img).setActiveObject(img);
 			canvas.remove(card)
-			canvas.renderAll.bind(canvas)
 			addCurrentStateToHistoryandSync();
 		})
 	}
@@ -1031,17 +1033,25 @@ function addDeck(){
 	menu.innerHTML += "<input id='deckurl'></input><button onclick = 'createDeck();'>Submit</button>";
 }
 
-function submitcard(url, backimage){
+function submitcard(url, backimage, deck){
 	if (url==null){
 		url = document.getElementById("cardurl").value;
 	}
-	if (backimage == null){
+	if(deck && !backimage){
+		backimage = deck.item(0).getSrc();
+	}
+	if (!backimage){
 		backimage = "http://clipart-library.com/images/8cEbeEMLi.png";
 	}
 	fabric.Image.fromURL(url, function(img) {
 	  img.scale(0.3);
 	  canvas.add(img).setActiveObject(img);
 	  addBackImageToCard(img, backimage);
+	  if(deck){
+		img.top = deck.top;
+		img.left = deck.left+deck.width;
+		img.setCoords();
+	  }
 	});
 	createMenu();
 }
@@ -1096,12 +1106,16 @@ function addDeckToImage(newdeck){
 		});
 	  };
 	})(newdeck.toObject);
-	/*
-	newdeck.on("click", function(){
-		var newcard = newdeck.deck.pop();
-		sumbitcard(newcard.src, newcard.backimage);		
+	
+	console.log(newdeck.top);
+	
+	newdeck.on("mouseup", function(){
+		if (newdeck.deck.length > 0){
+			var newcard = newdeck.deck.pop();
+			submitcard(newcard.getSrc(), newcard.backimage, newdeck);
+		}
 	})
-	*/
+	
 	
 }
 
