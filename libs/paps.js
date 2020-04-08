@@ -37,6 +37,7 @@
 function post(data){
 	chathistory += "<br>"+data
 	$("#chatoutput").html(chathistory);
+	$("#chatcontainer").css({"background-color": "orange"});
 }
 
 function synchronizeScenes(){
@@ -297,11 +298,11 @@ function interpretNetworkData(data){
 
 	}
 	
-	if(data.type == "event"){
+	if(data.type == 'event'){
 		var message = data.message;
 		post(message);
-		//rebroadcast(message);
-		$("#chatcontainer").css({"background-color": "orange"});
+		rebroadcast(JSON.stringify(data));
+
 	}
 
 	//when a state message is recieved, update all pieces on the board
@@ -540,6 +541,7 @@ function shuffleDeck(deck){
 }
 
 function broadcastEvent(eventText){
+	if(actingServer){post(eventText)};
 	packet = createEventPacket(eventText);
 	broadcast(packet);
 }
@@ -803,6 +805,7 @@ function shuffleActiveDecks(){
 	for(deck in selection){
 		shuffleDeck(selection[deck]);
 	}
+	addCurrentStateToHistoryandSync();
 }
 
 function createMenu(){
