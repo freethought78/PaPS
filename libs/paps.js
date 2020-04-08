@@ -33,7 +33,7 @@
 	})
 	
 
-//new code starts here
+
 function post(data){
 	chathistory += "<br>"+data
 	$("#chatoutput").html(chathistory);
@@ -510,6 +510,7 @@ function initialize(){
 	backgroundColorSelector = document.getElementById("colorpicker");
 	
 	setBackgroundColor();
+	resizeCanvas();
 }
 
 function addFileLoadListener(){
@@ -565,29 +566,35 @@ function loadScript(url, callback)
 	
 function addWindowResizeListener(){
 	$(window).resize(function(){
-		var height = $(window).height();
-		var width = $(window).width();
-		canvas.setDimensions({
-			width: width,
-			height: height
-		})
-		if(serverID != "disconnected"){
-			addChat();
-			addUserList();
-		}
-		
+		resizeCanvas();
 	});
 }
 
+function resizeCanvas(){
+	var height = $(window).height();
+	var width = $(window).width();
+	canvas.setDimensions({
+		width: width,
+		height: height
+	})
+	if(serverID != "disconnected"){
+		addChat();
+		addUserList();
+	}
+}
+
 function createCanvas(){
+
 	var height = $(window).height();
 	var width = $(window).width();
 
 	var canvascode = "<canvas id='c' width='"+width+"' height='"+height+"'></canvas>";
 
 	$("body").append(canvascode);
+	
 	var canvas = new fabric.Canvas('c');
 
+	
 	canvas.setDimensions({
 		width: "100%",
 		height: "100%"
@@ -1112,7 +1119,7 @@ function addDeckToImage(newdeck){
 	console.log(newdeck.top);
 	
 	newdeck.on("mouseup", function(){
-		if (newdeck.deck.length > 0){
+		if (newdeck.deck.length > 0 && newdeck.lockMovementX == true){
 			var newcard = newdeck.deck.pop();
 			var backimage;
 			if (!newcard.backimage){
