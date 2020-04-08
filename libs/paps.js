@@ -292,8 +292,16 @@ function interpretNetworkData(data){
 		var sender = data.user;
 		var message = data.message;
 		post(sender + ": " + message);
+		
 		$("#chatcontainer").css({"background-color": "orange"});
 
+	}
+	
+	if(data.type == "event"){
+		var message = data.message;
+		post(message);
+		//rebroadcast(message);
+		$("#chatcontainer").css({"background-color": "orange"});
 	}
 
 	//when a state message is recieved, update all pieces on the board
@@ -512,6 +520,35 @@ function initialize(){
 	setBackgroundColor();
 	resizeCanvas();
 }
+
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
+}
+
+function shuffleDeck(deck){
+	if(deck["deck"]){
+		deck["deck"] = shuffle(deck["deck"]);
+		broadcastEvent(username + " shuffled a deck.");
+	}
+}
+
+function broadcastEvent(eventText){
+	packet = createEventPacket(eventText);
+	broadcast(packet);
+}
+
+function createEventPacket(eventText){
+	var eventPacket = {type: "event", message: eventText};
+	return eventPacket;
+}
+
 
 function addFileLoadListener(){
 	$('input[type="file"]').change(function(e){
@@ -761,10 +798,18 @@ function constrainViewport(){
 	}
 }	
 
+function shuffleActiveDecks(){
+	selection = canvas.getActiveObjects();
+	for(deck in selection){
+		shuffleDeck(selection[deck]);
+	}
+}
+
 function createMenu(){
-	var menucode = '<button onclick = "addcard();">New Image</button>'+
-	'<button onclick = "addDeck();">New Deck</button>'+
+	var menucode = '<button onclick = "addcard();">New Card</button>'+
 	'<button onclick = "flip();">Flip</button>'+
+	'<button onclick = "addDeck();">New Deck</button>'+
+	'<button onclick = "shuffleActiveDecks();">Shuffle</button>'+
 	'<button onclick = "cloneSelected();">Clone</button>'+
 	'<button onclick = "deleteSelected();">Delete</button>'+
 	'<button onclick = "saveGame()">Save Game</button>'+
@@ -1087,15 +1132,7 @@ function createDeck(){
 				newdeck = new fabric.Group([ img1, img2, img3, img4], { left: 0, top: 0 });
 				var selected = canvas.getActiveObjects();
 				addDeckToImage(newdeck);
-				if(window.confirm("There are "+selected.length+" objects selected. Add these to the deck?")){
-					newdeck.deck=selected;
-				}else{
-					newdeck.deck=[];
-				}
-				deleteSelected();
-				
-				
-				
+				newdeck.deck=[];
 				canvas.add(newdeck).setActiveObject(newdeck);
 				addCurrentStateToHistoryandSync();
 			  });
