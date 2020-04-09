@@ -14,6 +14,7 @@
 	var gamehistory = [];
 	var currenthistoryposition = 0;
 	var defaultbackimage = "http://clipart-library.com/images/8cEbeEMLi.png";
+	var hand;
 	
 	actingServer = "none";
 
@@ -379,8 +380,58 @@ function firstRun(){
 		addUserList();
 	}
 	
+	addHand();
+	
 	initialize();
 }
+
+function addHand(){
+	if(!$("#h").length){
+		var handcontainer = document.createElement("div");
+		var h = document.createElement("canvas");
+		$(handcontainer).attr("id", "handcontainer");
+		$(h).attr("id", "h");
+		document.body.appendChild(handcontainer);
+		handcontainer.appendChild(h);
+		hand = new fabric.Canvas('h');
+		$(hand).attr("id", "hand");
+	}
+
+	
+	$(handcontainer).css({
+		"position": "absolute",
+		"top": $(window).height() - 50,
+		"z-index": 1,
+		"color": "white",
+		"background-color": "black",
+		"opacity": 0.5,
+		"height": "200px",
+		"width": $(window).width(),
+		"padding": 0
+	});
+	
+	//$("#h").css({
+	//	width: $(handcontainer).width(),
+	//	height: $(handcontainer).height()
+	//})
+	
+	hand.setDimensions({
+		width: $(handcontainer).width(),
+		height: $(handcontainer).height()
+	})
+	
+	$(handcontainer).click(function(){
+		$(handcontainer).css({"background-color": "black"});
+		$(handcontainer).animate({
+			top: $(window).height() - $(handcontainer).height()}, 200, "linear", function(){
+		});
+	});
+	
+	$(handcontainer).mouseleave(function(){
+		$(handcontainer).animate({top: $(window).height() - 50}, 200);
+	});
+}	
+
 
 function addUserList(){
 	//create user list window
@@ -619,6 +670,8 @@ function resizeCanvas(){
 		addChat();
 		addUserList();
 	}
+	
+	addHand();
 }
 
 function createCanvas(){
