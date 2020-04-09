@@ -391,7 +391,7 @@ function addUserList(){
 	$(userlist).css({
 		"position": "absolute",
 		"left": $(window).width() - 10,
-		"top": 0,
+		"top": $("#menu").height(),
 		"z-index": 1,
 		"color": "white",
 		"background-color": "black",
