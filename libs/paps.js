@@ -400,7 +400,7 @@ function addHand(){
 	
 	$(handcontainer).css({
 		"position": "absolute",
-		"top": $(window).height() - 50,
+		"top": window.innerHeight - 50,
 		"z-index": 1,
 		"color": "white",
 		"background-color": "black",
@@ -410,12 +410,7 @@ function addHand(){
 		"padding": 0
 	});
 	
-	//$("#h").css({
-	//	width: $(handcontainer).width(),
-	//	height: $(handcontainer).height()
-	//})
-	
-	hand.setDimensions({
+	$(hand).css({
 		width: $(window).width(),
 		height: $(handcontainer).height()
 	})
@@ -428,7 +423,7 @@ function addHand(){
 	});
 	
 	$(handcontainer).mouseleave(function(){
-		$(handcontainer).animate({top: $(window).height() - 50}, 200);
+		$(handcontainer).animate({top: window.innerHeight - 50}, 200);
 	});
 }	
 
@@ -671,7 +666,9 @@ function resizeCanvas(){
 		addUserList();
 	}
 	
-	addHand();
+	window.requestAnimationFrame(function(){
+		addHand();
+	})
 }
 
 function createCanvas(){
