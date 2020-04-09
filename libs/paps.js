@@ -387,7 +387,7 @@ function firstRun(){
 
 function addHand(){
 	if(!$("#h").length){
-		var handcontainer = document.createElement("div");
+		handcontainer = document.createElement("div");
 		var h = document.createElement("canvas");
 		$(handcontainer).attr("id", "handcontainer");
 		$(h).attr("id", "h");
@@ -416,7 +416,7 @@ function addHand(){
 	//})
 	
 	hand.setDimensions({
-		width: $(handcontainer).width(),
+		width: $(window).width(),
 		height: $(handcontainer).height()
 	})
 	
