@@ -37,7 +37,6 @@
 function post(data){
 	chathistory += "<br>"+data
 	$("#chatoutput").html(chathistory);
-	$("#chatcontainer").css({"background-color": "orange"});
 }
 
 function synchronizeScenes(){
@@ -430,19 +429,19 @@ function addChat(){
 	
 	$(chatcontainer).css({
 		"position": "absolute",
-		//"bottom": "0px",
-		"top": $(window).height() - 5,
+		"top": $("#menu").height(),
+		"right": $(window).width() - 10,
 		"z-index": 1,
 		"color": "white",
 		"background-color": "black",
 		"opacity": 0.5,
-		"height": "200px",
-		"width": $(window).width() - 10,
+		"height": $(window).height() / 2,
+		"width": 200,
 		"padding": "5px"
 	});
 	
 	$(chatoutput).css({
-		"height": "180px"
+		"height": $(chatcontainer).height() - $(chatinput).height() - 20
 	});
 	
 	$(chatinput).css({
@@ -469,14 +468,14 @@ function addChat(){
 	$(chatcontainer).click(function(){
 		$(chatcontainer).css({"background-color": "black"});
 		$(chatcontainer).animate({
-			top: $(window).height() - $(chatcontainer).height()-10}, 200, "linear", function(){
+			right: $(window).width() - $(chatcontainer).width() -10}, 200, "linear", function(){
 			$(chatinput).focus();
 		});
 	});
 	
 	$(chatcontainer).mouseleave(function(){
-		//$(chatcontainer).css("bottom", "");
-		$(chatcontainer).animate({top: $(window).height() - 5}, 200);
+		console.log("test")
+		$(chatcontainer).animate({right: $(window).width() - 10}, 200);
 		$(chatinput).blur();
 	});
 	
