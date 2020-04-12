@@ -780,7 +780,7 @@ function mouseUpInHand(){
 			var cardwidth = hand.width / 10
 			var cardscale =  cardwidth / img.width
 			img.scaleX = cardscale
-			img.scaleY = cardscale
+			img.scaleY = img.scaleX / aspectratio
 			img.top = 0;
 			img.left = 0;
 			addBackImageToCard(img, activeObject.backimage);
