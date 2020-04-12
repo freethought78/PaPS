@@ -117,10 +117,10 @@ function createMainMenu(){
 		'<button style="position:absolute; background-color:green" onclick="startSinglePlayer()">Single Player</button>'+
 		'<center>'+
 		'<div id="pageContent">'+
-		'<div style="background-color: #57B;">'+
+		'<div style="background-color: #152E5E;">'+
 		'<img height = "20%" src="'+papslogo+'"><br>'+
 		'<img height = "5%" src="'+papslogotext+'"></div>'+
-		'Your Nickname:<br>'+
+		'<br><span style="font-size: 1.5em">Your Nickname:</span><br>'+
 		'<div id="nameInputDiv">'+
 		'<input id="nameInput"><br>'+
 		'<button onclick="addConnectionDetails()">Submit Name</button>'+
@@ -130,6 +130,7 @@ function createMainMenu(){
 		'</center>'
 	);
 	$("body").css("margin", 0);
+	$("body").css("background-color", "#BDF8BA");
 	
 	//Enter pressed inside nickname input is the same as pressing the submit button
 	$("#nameInput").on('keyup', function (e) {
