@@ -15,6 +15,8 @@
 	var currenthistoryposition = 0;
 	var defaultbackimage = "http://clipart-library.com/images/8cEbeEMLi.png";
 	var hand;
+	var dragImage;
+	var handcontents = [];
 	
 	actingServer = "none";
 
@@ -396,6 +398,7 @@ function addHand(){
 		handcontainer.appendChild(h);
 		hand = new fabric.Canvas('h');
 		$(hand).attr("id", "hand");
+		
 	}
 
 	
@@ -406,26 +409,38 @@ function addHand(){
 		"color": "white",
 		"background-color": "black",
 		"opacity": 0.5,
-		"height": "200px",
+		"height": $(window).height(),
 		"width": $(window).width(),
 		"padding": 0
 	});
-	
-	$(hand).css({
+	hand.width = $(window).width()
+	hand.height = $(window).height();
+	hand.setDimensions({
 		width: $(window).width(),
-		height: $(handcontainer).height()
-	})
+		height: $(window).width()
+	},{
+		cssOnly: true
+	});
+
+	hand.setZoom(1);
+	
 	
 	$(handcontainer).click(function(){
 		$(handcontainer).css({"background-color": "black"});
 		$(handcontainer).animate({
-			top: $(window).height() - $(handcontainer).height()}, 200, "linear", function(){
+		top: $(window).height() - 200}, 200, "linear", function(){
 		});
 	});
 	
 	$(handcontainer).mouseleave(function(){
 		$(handcontainer).animate({top: window.innerHeight - 50}, 200);
 	});
+	
+	$(handcontainer).mouseup(function(){
+		mouseUpInHand();
+	});
+	
+	
 }	
 
 
@@ -551,7 +566,9 @@ function initialize(){
 	addWindowResizeListener();
 	addFileLoadListener();
 	
+	
 	addCanvasEventListeners();
+	addCardFromBoardToHandListener();
 			
 	canvas.setZoom(zoom);
 	
@@ -725,12 +742,67 @@ function createCanvas(){
 	})
 	
 	
+	
 
 	return(canvas);
 }
-/*
 
-*/
+function addCardFromBoardToHandListener(){
+	canvas.observe("object:moving", function (event) {
+		//console.log(event.e.clientY);
+		if(Intersect([event.e.clientX, event.e.clientY], handcontainer)){
+			
+			var activeObject = canvas.getActiveObject();
+			activeObject.clone(function (c) { dragImage = c; });
+			$(handcontainer).css({"background-color": "orange"});
+		}
+	});
+	
+}
+
+function mouseUpInHand(){
+	if (dragImage != null) {
+		var aspectratio = dragImage.height/dragImage.width;
+		//console.log(dragImage);
+		var activeObject = canvas.getActiveObject();
+		//var widthratio = activeObject.width
+		
+		fabric.Image.fromURL(activeObject.getSrc(), function(img) {
+			
+			img.scaleX = zoom /10
+			img.scaleY = zoom /10 
+			img.top = 0;
+			img.left = 0;
+			addBackImageToCard(img, activeObject.backimage);
+			hand.add(img).setActiveObject(img);
+			canvas.remove(activeObject)
+			addCurrentStateToHistoryandSync();
+		})
+		
+		//hand.add(activeObject);
+		//var singlecardwidth = hand.width / 10
+		//var widthratio = singlecardwidth / activeObject.width
+		
+		/*
+		activeObject.set({
+			top: 0, left: 0 , scaleX: zoom , scaleY: zoom
+		});*/
+		//activeObject.scaleY = activeObject.scaleY * (canvas.height/hand.height) * 0.1;
+		//activeObject.scaleX = activeObject.scaleX * (canvas.width/hand.width) * 0.1;
+		//canvas.remove(activeObject);
+		
+	}
+	dragImage = null;
+}
+
+
+function Intersect(point, element) {
+ return (      point[0] > element.offsetLeft
+               && point[0] < element.offsetLeft + element.offsetWidth
+               && point[1] < element.offsetTop + element.offsetHeight
+               && point[1] > element.offsetTop
+            );     
+}
 
 function addZoomListener(){
 	canvas.on('mouse:wheel', function(opt) {
