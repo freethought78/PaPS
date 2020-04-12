@@ -390,12 +390,21 @@ function firstRun(){
 
 function addHand(){
 	if(!$("#h").length){
+		var height = $(window).height();
+		var width = $(window).width();
 		handcontainer = document.createElement("div");
-		var h = document.createElement("canvas");
 		$(handcontainer).attr("id", "handcontainer");
-		$(h).attr("id", "h");
+		
+		var canvascode = "<canvas id='h' width='"+width+"' height='"+height+"'></canvas>";
+
+		
+		
+		//var h = document.createElement("canvas");
+		
+		//$(h).attr("id", "h");
 		document.body.appendChild(handcontainer);
-		handcontainer.appendChild(h);
+		$(handcontainer).append(canvascode);
+		//handcontainer.appendChild(h);
 		hand = new fabric.Canvas('h');
 		$(hand).attr("id", "hand");
 		
@@ -413,8 +422,8 @@ function addHand(){
 		"width": $(window).width(),
 		"padding": 0
 	});
-	hand.width = $(window).width()
-	hand.height = $(window).height();
+	//hand.width = $(window).width()
+	//hand.height = $(window).height();
 	hand.setDimensions({
 		width: $(window).width(),
 		height: $(window).width()
@@ -768,9 +777,10 @@ function mouseUpInHand(){
 		//var widthratio = activeObject.width
 		
 		fabric.Image.fromURL(activeObject.getSrc(), function(img) {
-			
-			img.scaleX = zoom /10
-			img.scaleY = zoom /10 
+			var cardwidth = hand.width / 10
+			var cardscale =  cardwidth / img.width
+			img.scaleX = cardscale
+			img.scaleY = cardscale
 			img.top = 0;
 			img.left = 0;
 			addBackImageToCard(img, activeObject.backimage);
