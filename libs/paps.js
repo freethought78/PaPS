@@ -783,10 +783,15 @@ function mouseUpInHand(){
 			//img.top = 0;
 			//img.left = 0;
 			img.top -= img.getScaledHeight()/2
+			//img.left -= img.getScaledWidth()/2
+			img.left = ((hand.getObjects().length) * 20) + (hand.getObjects().length * 20) 
+			
 			addBackImageToCard(img, activeObject.backimage);
 			hand.add(img).setActiveObject(img);
 			canvas.remove(activeObject)
 			var group = new fabric.Group(hand.getObjects())
+			
+			
 			group.left = (hand.width / 2) 
 			group.originX = "center";
 			group.originY = "top";
