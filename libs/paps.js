@@ -430,13 +430,55 @@ function addHand(){
 	},{
 		cssOnly: true
 	});
-	hand.on("object:moving", function(card){
-		if(card.target.top > 0){
-			card.target.top = 0
+	hand.on("object:moving", function(event){
+		if(event.target.top > 0){
+			event.target.top = 0
 		}
-	})
+		if(!Intersect([event.e.clientX, event.e.clientY], handcontainer) && hand.getActiveObject()!=null) {
+			var activeObject = hand.getActiveObject();
+			activeObject.clone(function (c) { dragImage = c; });
+			hand.discardActiveObject().renderAll();
+			//canvas.add(dragImage);
+			
+			
+			//$(handcontainer).css({"background-color": "orange"});
+			fabric.Image.fromURL(event.target.getSrc(), function(img) {
+				//var cardwidth = hand.width / 10
+				//var cardscale =  cardwidth / img.width
+				//img.scaleX = cardscale
+				//img.scaleY = img.scaleX / aspectratio
+				hand.remove(event.target);
+				//img.top = 0 ;
+				img.originY = "center"
+				img.originX = "center"
+				
+				addBackImageToCard(img, event.target.backimage);
+				canvas.add(img)//.setActiveObject(img);
+				img.left = event.e.clientX
+				img.top = event.e.clientY
+				img.setCoords()
+				canvas.renderAll.bind(canvas);
+				//img.setCoords();
+				//console.log(card)
+				
+			})
+			
+		}
+		
+		if (dragImage != null) {
+			//var aspectratio = dragImage.height/dragImage.width;
+			//console.log(dragImage);
+			var activeObject = hand.getActiveObject();
+			//var widthratio = activeObject.width
+			
+			hand.remove(activeObject)
+			dragImage = null;
+		}
+		
+		
 
 	hand.setZoom(1);
+	})
 	
 	
 	$(handcontainer).click(function(){
@@ -455,7 +497,7 @@ function addHand(){
 	});
 	
 	
-}	
+}
 
 
 function addUserList(){
@@ -582,7 +624,7 @@ function initialize(){
 	
 	
 	addCanvasEventListeners();
-	addCardFromBoardToHandListener();
+	addCardFromTableToHandListener();
 			
 	canvas.setZoom(zoom);
 	
@@ -642,7 +684,10 @@ function addCanvasEventListeners(){
 	//canvas.on('object:added', synchronizeScenes);
 	//canvas.on('object:removed', synchronizeScenes);
 	//canvas.on('object:modified', synchronizeScenes);
-	canvas.on('mouse:up', addCurrentStateToHistoryandSync);
+	canvas.on('mouse:up', function(){
+		mouseUpOffHand();
+		addCurrentStateToHistoryandSync
+	});
 	//$(".canvas-container").onmouseup = function(){addCurrentStateToHistoryandSync()};
 	//addKeyListener();
 }
@@ -761,7 +806,7 @@ function createCanvas(){
 	return(canvas);
 }
 
-function addCardFromBoardToHandListener(){
+function addCardFromTableToHandListener(){
 	canvas.observe("object:moving", function (event) {
 		//console.log(event.e.clientY);
 		if(Intersect([event.e.clientX, event.e.clientY], handcontainer)){
@@ -818,6 +863,50 @@ function mouseUpInHand(){
 	dragImage = null;
 }
 
+function mouseUpOffHand(){
+	if (dragImage != null) {
+		//var aspectratio = dragImage.height/dragImage.width;
+		//console.log(dragImage);
+		var activeObject = hand.getActiveObject();
+		//var widthratio = activeObject.width
+		fabric.Image.fromURL(activeObject.getSrc(), function(img) {
+			//var cardwidth = hand.width / 10
+			//var cardscale =  cardwidth / img.width
+			//img.scaleX = cardscale
+			//img.scaleY = img.scaleX / aspectratio
+
+			//img.top = 0 ;
+			//img.originY = "top"
+			//img.originX = "center"
+			
+			addBackImageToCard(img, activeObject.backimage);
+			canvas.add(img).setActiveObject(img);
+			
+			hand.remove(activeObject)	
+			var handobjects = hand.getObjects();
+			for (card in handobjects){
+				var cardseparation = cardwidth /2;
+				handobjects[card].set({
+					left: (hand.width /2) + ((card - (handobjects.length /2))*cardseparation),
+					top: 0,
+					lockMovementX: true
+				});
+				handobjects[card].on("mouseup", function(){
+					handobjects[card].set({
+						left: (hand.width /2) + ((card - (handobjects.length /2))*cardseparation),
+						top: 0,
+						lockMovementX: true
+					});
+				})
+				handobjects[card].setCoords();
+			}
+
+			hand.renderAll.bind(hand);
+			addCurrentStateToHistoryandSync();
+		})		
+	}
+	dragImage = null;
+}
 
 function Intersect(point, element) {
  return (      point[0] > element.offsetLeft
