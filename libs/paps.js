@@ -782,25 +782,27 @@ function mouseUpInHand(){
 			img.scaleY = img.scaleX / aspectratio
 			//img.top = 0;
 			//img.left = 0;
-			img.top -= img.getScaledHeight()/2
-			//img.left -= img.getScaledWidth()/2
-			img.left = ((hand.getObjects().length) * 20) + (hand.getObjects().length * 20) 
+			img.top = 0 ;
+			img.originY = "top"
+			img.originX = "center"
+			hand.originX = "center"
+			hand.originY = "top"
+
+			//img.left = ((hand.getObjects().length) /2) * 20
 			
 			addBackImageToCard(img, activeObject.backimage);
 			hand.add(img).setActiveObject(img);
-			canvas.remove(activeObject)
-			var group = new fabric.Group(hand.getObjects())
-			
-			
-			group.left = (hand.width / 2) 
-			group.originX = "center";
-			group.originY = "top";
-			group.top += img.getScaledHeight()/2
-			
+			canvas.remove(activeObject)	
+			var handobjects = hand.getObjects();
+			for (card in handobjects){
+				var cardseparation = cardwidth /2;
+				handobjects[card].set({
+					left: (hand.width /2) + ((card - (handobjects.length /2))*cardseparation),
+					top: 0
+				});
+				handobjects[card].setCoords();
+			}
 
-			//img.left -= img.getScaledWidth /2
-			//img.top = 0-img.getScaledHeight()/2;
-			group.setCoords()
 			hand.renderAll.bind(hand);
 			addCurrentStateToHistoryandSync();
 		})
