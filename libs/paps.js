@@ -504,6 +504,7 @@ function addHand(){
 					})
 				}
 				
+				$(nfcdiv).show();
 				fc.add(img);
 				img.originX = "center"
 				img.originY = "center"
@@ -521,9 +522,10 @@ function addHand(){
 				$("body").mouseup(function(){
 					if (globals.img != null){
 						canvas.add(globals.img)
-						fc.clear()
+						fc.remove(globals.img)
 						$(nfcdiv).hide();
 						globals.img = null
+						canvas.renderAll()
 						//addHand();
 					}
 				})
