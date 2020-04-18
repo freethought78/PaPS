@@ -453,6 +453,8 @@ function addHand(){
 				//img.top = 0 ;
 				img.originY = "center"
 				img.originX = "center"
+				img.scaleX = event.target.oldScaleX
+				img.scaleY = event.target.oldScaleY
 				
 				addBackImageToCard(img, event.target.backimage);
 				
@@ -522,6 +524,7 @@ function addHand(){
 				$("body").mouseup(function(){
 					if (globals.img != null){
 						canvas.add(globals.img)
+						canvas.setActiveObject(globals.img)
 						fc.remove(globals.img)
 						$(nfcdiv).hide();
 						globals.img = null
@@ -891,6 +894,9 @@ function mouseUpInHand(){
 			img.top = 0 ;
 			img.originY = "top"
 			img.originX = "center"
+			img.oldScaleX = activeObject.scaleX;
+			img.oldScaleY = activeObject.scaleY;
+			
 			
 			addBackImageToCard(img, activeObject.backimage);
 			hand.add(img).setActiveObject(img);
