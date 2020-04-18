@@ -17,6 +17,10 @@
 	var hand;
 	var dragImage;
 	var handcontents = [];
+	var globals = {}
+	var fc
+	var nfc
+	var nfcdiv
 	
 	actingServer = "none";
 
@@ -435,8 +439,6 @@ function addHand(){
 			event.target.top = 0
 		}
 		if(!Intersect([event.e.clientX, event.e.clientY], handcontainer) && hand.getActiveObject()!=null) {
-			var activeObject = hand.getActiveObject();
-			activeObject.clone(function (c) { dragImage = c; });
 			hand.discardActiveObject().renderAll();
 			//canvas.add(dragImage);
 			
@@ -453,6 +455,8 @@ function addHand(){
 				img.originX = "center"
 				
 				addBackImageToCard(img, event.target.backimage);
+				
+				/*
 				canvas.add(img)//.setActiveObject(img);
 				img.left = event.e.clientX
 				img.top = event.e.clientY
@@ -460,23 +464,74 @@ function addHand(){
 				canvas.renderAll.bind(canvas);
 				//img.setCoords();
 				//console.log(card)
+				*/
+				if (nfcdiv == null){
+					nfcdiv = document.createElement('div'); 
+					document.body.appendChild(nfcdiv);
+					$(nfcdiv).css({
+						margin:0,
+						padding:0,
+						width: "100%",
+						height: "100%",
+						position: "absolute",
+						top:0,
+						left: 0
+					})
+				}
+				
+				if (nfc == null){
+					nfc = document.createElement("canvas");
+					nfcdiv.appendChild(nfc);
+					$(nfc).css({
+						margin:0,
+						padding:0,
+						width: "100%",
+						height: "100%",
+						position: "absolute",
+						top:0,
+						left: 0
+					})
+
+				}
+				
+				
+				
+				
+				if (fc == null){ fc = new fabric.Canvas(nfc) 
+					fc.setDimensions({
+						width: window.innerWidth,
+						height: window.innerHeight
+					})
+				}
+				
+				fc.add(img);
+				img.originX = "center"
+				img.originY = "center"
+				globals.img = img;
+				
+				
+				fc.on("mouse:move", function(event){
+					if(globals.img){
+						globals.img.top = event.e.clientY
+						globals.img.left = event.e.clientX
+						fc.renderAll();
+					}
+				})
+				
+				$("body").mouseup(function(){
+					if (globals.img != null){
+						canvas.add(globals.img)
+						fc.clear()
+						$(nfcdiv).hide();
+						globals.img = null
+						//addHand();
+					}
+				})
 				
 			})
 			
 		}
 		
-		if (dragImage != null) {
-			//var aspectratio = dragImage.height/dragImage.width;
-			//console.log(dragImage);
-			var activeObject = hand.getActiveObject();
-			//var widthratio = activeObject.width
-			
-			hand.remove(activeObject)
-			dragImage = null;
-		}
-		
-		
-
 	hand.setZoom(1);
 	})
 	
