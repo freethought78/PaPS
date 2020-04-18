@@ -1122,11 +1122,27 @@ function createMenu(){
 	'<button id = "historyBack" onclick = "historyBack()" style="background:gray"><</button>'+
 	'<button id = "historyForward" onclick = "historyForward()" style="background:gray">></button>'+
 	'<button id = "historyEnd" onclick = "historyEnd()" style="background:gray">>></button>'+
+	'<button id = "setBackground" onclick = "setBackground()">Background</button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">'+
 	'<button onclick = "fullscreen();">Full Screen</button>';
 	
 	$("#menu").html(menucode);
 	backgroundColorSelector = document.getElementById("colorpicker");
+}
+
+function setBackground(){
+	menu.innerHTML += "<input id='backgroundurl'></input><button onclick = 'submitBackground();'>Submit</button>";
+}
+
+function submitBackground(){
+	var url = $("#backgroundurl").val()
+	fabric.Image.fromURL(url, function(img) {
+		canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+			scaleX: canvas.width / img.width,
+			scaleY: canvas.height / img.height
+		})
+	})
+	createMenu();
 }
 
 function flip(){
