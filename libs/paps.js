@@ -406,6 +406,7 @@ function addHand(){
 		$(handcontainer).append(canvascode);
 		//handcontainer.appendChild(h);
 		hand = new fabric.Canvas('h');
+		hand.preserveObjectStacking = true;
 		$(hand).attr("id", "hand");
 		
 	}
