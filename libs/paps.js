@@ -419,7 +419,7 @@ function addHand(){
 		"background-color": "lightgray",
 		"opacity": 0.8,
 		"height": window.innerHeight,
-		"width": window.inn,
+		"width": window.innerWidth,
 		"padding": 0
 	});
 	//hand.width = $(window).width()
@@ -428,7 +428,7 @@ function addHand(){
 		width: window.innerWidth,
 		height: window.innerHeight
 	},{
-		cssOnly: true
+		cssOnly: false
 	});
 	
 	hand.on("object:moving", function(event){
@@ -789,8 +789,41 @@ function loadScript(url, callback)
 	
 function addWindowResizeListener(){
 	$(window).resize(function(){
+		console.log('window resize')
 		resizeCanvas();
+		resizeHand();
 	});
+}
+
+function resizeHand(){
+	hand.setDimensions({
+		width: window.innerWidth,
+		height: window.innerHeight
+	},{
+		cssOnly: false
+	});
+	rescaleCardsInHand();
+	recenterCardsInHand();
+	hand.renderAll.bind(hand)
+}
+
+function recenterCardsInHand(){
+	var cardwidth = hand.width / 5
+	var handobjects = hand.getObjects();
+	for (card in handobjects){
+		var thiscard = handobjects[card]
+		var cardseparation = cardwidth /2;
+		thiscard.set({
+			left: (hand.width /2) + ((card - ((handobjects.length-1) /2))*cardseparation),
+			top: 0,
+			lockMovementX: true
+		});
+		thiscard.on("mouseup", function(){
+			recenterCardsInHand();
+		})
+		thiscard.setCoords();
+	}
+	hand.renderAll.bind(hand)
 }
 
 function resizeCanvas(){
@@ -826,7 +859,7 @@ function createCanvas(){
 		width: "100%",
 		height: "100%"
 	},{
-		cssOnly: true
+		cssOnly: false
 	});
 	
 	stage = document.getElementById("c");
@@ -878,6 +911,17 @@ function addCardFromTableToHandListener(){
 	
 }
 
+function rescaleCardsInHand(){
+	hand.forEachObject(function(card){
+		console.log("scaling")
+		var cardwidth = hand.width / 5
+		var cardscale = cardwidth / card.getScaledWidth()
+		card.scaleX = card.scaleX * cardscale
+		card.scaleY = card.scaleY * cardscale
+	})
+	hand.renderAll.bind(hand);
+}
+
 function mouseUpInHand(){
 	$(handcontainer).css({"background-color": "lightgray"})
 	if (dragImage != null) {
@@ -886,11 +930,15 @@ function mouseUpInHand(){
 		var aspectratio = activeObject.getScaledHeight()/activeObject.getScaledWidth();
 		//var widthratio = activeObject.width
 		fabric.Image.fromURL(activeObject.getSrc(), function(img) {
+			
+			
 			var cardwidth = hand.width / 5
+			/*
 			var cardscale = cardwidth / activeObject.getScaledWidth()
 			img.scaleX = activeObject.scaleX * cardscale
 			img.scaleY = activeObject.scaleY * cardscale
-
+			*/
+			
 			img.top = 0 ;
 			img.originY = "top"
 			img.originX = "center"
@@ -909,29 +957,13 @@ function mouseUpInHand(){
 			  };
 			})(img.toObject);
 			canvas.remove(activeObject)	
-			var handobjects = hand.getObjects();
-			for (card in handobjects){
-				var thiscard = handobjects[card]
-				var cardseparation = cardwidth /2;
-				thiscard.set({
-					left: (hand.width /2) + ((card - ((handobjects.length-1) /2))*cardseparation),
-					top: 0,
-					lockMovementX: true
-				});
-				thiscard.on("mouseup", function(){
-					thiscard.set({
-						left: (hand.width /2) + ((card - ((handobjects.length-1) /2))*cardseparation),
-						top: 0,
-						lockMovementX: true
-					});
-				})
-				thiscard.setCoords();
-			}
-			
+			recenterCardsInHand()
+			rescaleCardsInHand();
 			hand.renderAll.bind(hand);
 			addCurrentStateToHistoryandSync();
 		})		
 	}
+	
 	dragImage = null;
 }
 
