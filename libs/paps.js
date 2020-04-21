@@ -390,8 +390,8 @@ function firstRun(){
 
 function addHand(){
 	if(!$("#h").length){
-		var height = $(window).height();
-		var width = $(window).width();
+		var height = window.innerHeight;
+		var width = window.innerWidth;
 		handcontainer = document.createElement("div");
 		$(handcontainer).attr("id", "handcontainer");
 		
@@ -416,17 +416,17 @@ function addHand(){
 		"top": window.innerHeight - 50,
 		"z-index": 1,
 		"color": "white",
-		"background-color": "black",
-		"opacity": 0.5,
-		"height": $(window).height(),
-		"width": $(window).width(),
+		"background-color": "lightgray",
+		"opacity": 0.8,
+		"height": window.innerHeight,
+		"width": window.inn,
 		"padding": 0
 	});
 	//hand.width = $(window).width()
 	//hand.height = $(window).height();
 	hand.setDimensions({
-		width: $(window).width(),
-		height: $(window).width()
+		width: window.innerWidth,
+		height: window.innerHeight
 	},{
 		cssOnly: true
 	});
@@ -520,7 +520,7 @@ function addHand(){
 				
 				$("body").mouseup(function(){
 					if (globals.img != null){
-						$(hand).css({"background-color": "black"})
+						$(hand).css({"background-color": "lightgray"})
 						canvas.add(globals.img)
 						canvas.setActiveObject(globals.img)
 						fc.remove(globals.img)
@@ -541,7 +541,7 @@ function addHand(){
 	
 	
 	$(handcontainer).click(function(){
-		$(handcontainer).css({"background-color": "black"});
+		$(handcontainer).css({"background-color": "lightgray"});
 		$(handcontainer).animate({
 		top: $(window).height() - 200}, 200, "linear", function(){
 		});
@@ -879,16 +879,17 @@ function addCardFromTableToHandListener(){
 }
 
 function mouseUpInHand(){
-	$(handcontainer).css({"background-color": "black"})
+	$(handcontainer).css({"background-color": "lightgray"})
 	if (dragImage != null) {
-		var aspectratio = dragImage.height/dragImage.width;
+		//var aspectratio = dragImage.getScaledHeight()/dragImage.getScaledWidth();
 		var activeObject = canvas.getActiveObject();
+		var aspectratio = activeObject.getScaledHeight()/activeObject.getScaledWidth();
 		//var widthratio = activeObject.width
 		fabric.Image.fromURL(activeObject.getSrc(), function(img) {
-			var cardwidth = hand.width / 10
-			var cardscale =  cardwidth / img.width
-			img.scaleX = cardscale
-			img.scaleY = img.scaleX / aspectratio
+			var cardwidth = hand.width / 5
+			var cardscale = cardwidth / activeObject.getScaledWidth()
+			img.scaleX = activeObject.scaleX * cardscale
+			img.scaleY = activeObject.scaleY * cardscale
 
 			img.top = 0 ;
 			img.originY = "top"
