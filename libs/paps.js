@@ -1368,7 +1368,17 @@ function loadGame(inputJSON){
 		canvas.forEachObject(function(thisobject){
 			console.log('checking for decks')
 			if (thisobject.deck != null){
+				
 				thisobject.deck = JSON.parse(thisobject.deck)
+				
+				thisobject.toObject = (function(toObject) {
+				  return function() {
+					return fabric.util.object.extend(toObject.call(thisobject), {
+					  deck: JSON.stringify(thisobject.deck)
+					});
+				  };
+				})(thisobject.toObject);
+				
 				thisobject.on("mouseup", function(){
 					if (thisobject.deck.length > 0 && thisobject.lockMovementX == true){
 						var newcard = thisobject.deck.pop();
