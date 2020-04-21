@@ -238,20 +238,17 @@ function connect(connectiontype){
 	p.on('error', function(err){console.log('error', err)})
 
 	p.on('signal', function(data){
-		console.log('SIGNAL', JSON.stringify(data))
 		$('#outgoing').html(JSON.stringify(data));
 	})
 
 
 	p.on('connect', function(){
-		console.log('CONNECT')
 		p.send(JSON.stringify(createConnectionPacket()));
 		
 
 	})
 
 	p.on('data', function(data){
-		console.log('data: ' + data)
 		interpretNetworkData(data);
 	})
 	
@@ -264,9 +261,7 @@ function createConnectionPacket(){
 }
 
 function interpretNetworkData(data){
-	//console.log(data);
 	data=JSON.parse(data);
-//alert the console when network traffic is recieved
 	if(data.type == "connection"){
 		remoteName = data.name;
 		
@@ -465,7 +460,6 @@ function addHand(){
 				img.setCoords()
 				canvas.renderAll.bind(canvas);
 				//img.setCoords();
-				//console.log(card)
 				*/
 				if (nfcdiv == null){
 					nfcdiv = document.createElement('div'); 
@@ -652,7 +646,6 @@ function addChat(){
 	});
 	
 	$(chatcontainer).mouseleave(function(){
-		console.log("test")
 		$(chatcontainer).animate({right: $(window).width() - 10}, 200);
 		$(chatinput).blur();
 	});
@@ -699,6 +692,7 @@ function initialize(){
 	
 	setBackgroundColor();
 	resizeCanvas();
+	addCurrentStateToHistoryandSync()
 }
 
 function shuffle(a) {
@@ -746,7 +740,7 @@ function addCanvasEventListeners(){
 	//canvas.on('object:modified', synchronizeScenes);
 	canvas.on('mouse:up', function(){
 		mouseUpOffHand();
-		addCurrentStateToHistoryandSync
+		addCurrentStateToHistoryandSync();
 	});
 	//$(".canvas-container").onmouseup = function(){addCurrentStateToHistoryandSync()};
 	//addKeyListener();
@@ -754,12 +748,12 @@ function addCanvasEventListeners(){
 
 function addCurrentStateToHistoryandSync(){
 	window.requestAnimationFrame(function(){
-		
+		console.log('syncing');
 		var newdata = JSON.stringify(canvas);
 		var olddata = gamehistory[currenthistoryposition]
 		if ((newdata != olddata) /*&& (currenthistoryposition == gamehistory.length -2)*/){
 			gamehistory.push(newdata);
-			currenthistoryposition = gamehistory.length - 1;
+			currenthistoryposition = gamehistory.length -1;
 			colorHistoryButtons();
 			synchronizeScenes();
 		}
@@ -835,10 +829,8 @@ function createCanvas(){
 			  return _obj.containsPoint(_mouse);
 
 			});
-			console.log(_targets);	
 			var objectsContainingPoint = _targets;
 			for (card in objectsContainingPoint){
-				 console.log("test");
 				if(objectsContainingPoint[card].deck){
 					selection = canvas.getActiveObjects();
 					for (currentimage in selection){
@@ -851,7 +843,7 @@ function createCanvas(){
 							}
 							*/
 							newcard = selection[currentimage];
-							objectsContainingPoint[card].deck.push(newcard);
+							objectsContainingPoint[card].deck.push(newcard.toObject());
 							canvas.remove(selection[currentimage]);
 						}
 					}
@@ -868,7 +860,6 @@ function createCanvas(){
 
 function addCardFromTableToHandListener(){
 	canvas.observe("object:moving", function (event) {
-		//console.log(event.e.clientY);
 		if(Intersect([event.e.clientX, event.e.clientY], handcontainer)){
 			
 			var activeObject = canvas.getActiveObject();
@@ -882,7 +873,6 @@ function addCardFromTableToHandListener(){
 function mouseUpInHand(){
 	if (dragImage != null) {
 		var aspectratio = dragImage.height/dragImage.width;
-		//console.log(dragImage);
 		var activeObject = canvas.getActiveObject();
 		//var widthratio = activeObject.width
 		fabric.Image.fromURL(activeObject.getSrc(), function(img) {
@@ -929,7 +919,6 @@ function mouseUpInHand(){
 function mouseUpOffHand(){
 	if (dragImage != null) {
 		//var aspectratio = dragImage.height/dragImage.width;
-		//console.log(dragImage);
 		var activeObject = hand.getActiveObject();
 		//var widthratio = activeObject.width
 		fabric.Image.fromURL(activeObject.getSrc(), function(img) {
@@ -1358,7 +1347,7 @@ function deleteSelected(){
 
 
 function saveGame(){
-	state = JSON.stringify(canvas);
+	state = JSON.stringify(canvas.toJSON());
 	download(state, "test.txt", "text");
 }
 
@@ -1376,7 +1365,24 @@ function loadFile(fileToRead){
 
 function loadGame(inputJSON){
 	canvas.loadFromJSON(inputJSON, function(){
-		//canvas.renderAll.bind(canvas);
+		canvas.forEachObject(function(thisobject){
+			console.log('checking for decks')
+			if (thisobject.deck != null){
+				thisobject.deck = JSON.parse(thisobject.deck)
+				thisobject.on("mouseup", function(){
+					if (thisobject.deck.length > 0 && thisobject.lockMovementX == true){
+						var newcard = thisobject.deck.pop();
+						var backimage;
+						if (!newcard.backimage){
+							backimage = thisobject.item(0).getSrc();
+						} else {
+							backimage = newcard.backimage;
+						}
+						submitcard(newcard.src, backimage, thisobject);
+					}
+				})
+			}
+		})
 	});
 }
 
@@ -1407,13 +1413,10 @@ function submitcard(url, backimage, deck){
 	}
 	if(deck && !backimage){
 		backimage = deck.item(0).getSrc();
-	}/*
-	if (!backimage){
-		backimage = "http://clipart-library.com/images/8cEbeEMLi.png";
-	}*/
+	}
 	fabric.Image.fromURL(url, function(img) {
 	  img.scale(0.3);
-	  canvas.add(img)//.setActiveObject(img);
+	  canvas.add(img)
 	  addBackImageToCard(img, backimage);
 	  if(deck){
 		img.top = deck.top;
@@ -1424,6 +1427,7 @@ function submitcard(url, backimage, deck){
 	  }
 	});
 	createMenu();
+	addCurrentStateToHistoryandSync()
 }
 
 function createDeck(){
@@ -1464,27 +1468,25 @@ function addDeckToImage(newdeck){
 	newdeck.toObject = (function(toObject) {
 	  return function() {
 		return fabric.util.object.extend(toObject.call(newdeck), {
-		  deck: newdeck.deck
+		  deck: JSON.stringify(newdeck.deck)
 		});
 	  };
 	})(newdeck.toObject);
 	
-	console.log(newdeck.top);
-	
 	newdeck.on("mouseup", function(){
-		if (newdeck.deck.length > 0 && newdeck.lockMovementX == true){
-			var newcard = newdeck.deck.pop();
-			var backimage;
-			if (!newcard.backimage){
-				backimage = newdeck.item(0).getSrc();
-			} else {
-				backimage = newcard.backimage;
-			}
-			submitcard(newcard.getSrc(), backimage, newdeck);
+	if (newdeck.deck.length > 0 && newdeck.lockMovementX == true){
+		var newcard = newdeck.deck.pop();
+		var backimage;
+		if (!newcard.backimage){
+			backimage = newdeck.item(0).getSrc();
+		} else {
+			backimage = newcard.backimage;
 		}
-	})
+		submitcard(newcard.src, backimage, newdeck);
+	}
+})
 	
-	
+	addCurrentStateToHistoryandSync();
 }
 
 function addBackImageToCard(card, newimage){
