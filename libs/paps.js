@@ -429,6 +429,7 @@ function addHand(){
 	},{
 		cssOnly: true
 	});
+	
 	hand.on("object:moving", function(event){
 		if(event.target.top > 0){
 			event.target.top = 0
@@ -514,9 +515,11 @@ function addHand(){
 						fc.renderAll();
 					}
 				})
+
 				
 				$("body").mouseup(function(){
 					if (globals.img != null){
+						$(hand).css({"background-color": "black"})
 						canvas.add(globals.img)
 						canvas.setActiveObject(globals.img)
 						fc.remove(globals.img)
@@ -871,6 +874,7 @@ function addCardFromTableToHandListener(){
 }
 
 function mouseUpInHand(){
+	$(handcontainer).css({"background-color": "black"})
 	if (dragImage != null) {
 		var aspectratio = dragImage.height/dragImage.width;
 		var activeObject = canvas.getActiveObject();
@@ -909,7 +913,7 @@ function mouseUpInHand(){
 				})
 				thiscard.setCoords();
 			}
-
+			
 			hand.renderAll.bind(hand);
 			addCurrentStateToHistoryandSync();
 		})		
