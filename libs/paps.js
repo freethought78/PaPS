@@ -21,6 +21,7 @@
 	var fc
 	var nfc
 	var nfcdiv
+	var handhistory = [];
 	
 	actingServer = "none";
 
@@ -526,6 +527,7 @@ function addHand(){
 						$(nfcdiv).hide();
 						globals.img = null
 						canvas.renderAll()
+						addCurrentStateToHistoryandSync()
 						//addHand();
 					}
 				})
@@ -738,9 +740,9 @@ function addFileLoadListener(){
 
 function addCanvasEventListeners(){
 	// whenever the canvas is modified, synchronize it across the network
-	//canvas.on('object:added', synchronizeScenes);
-	//canvas.on('object:removed', synchronizeScenes);
-	//canvas.on('object:modified', synchronizeScenes);
+	canvas.on('object:added', addCurrentStateToHistoryandSync());
+	canvas.on('object:removed', addCurrentStateToHistoryandSync());
+	canvas.on('object:modified', addCurrentStateToHistoryandSync());	
 	canvas.on('mouse:up', function(){
 		mouseUpOffHand();
 		addCurrentStateToHistoryandSync();
@@ -749,6 +751,8 @@ function addCanvasEventListeners(){
 	//addKeyListener();
 }
 
+
+
 function addCurrentStateToHistoryandSync(){
 	window.requestAnimationFrame(function(){
 		console.log('syncing');
@@ -756,6 +760,7 @@ function addCurrentStateToHistoryandSync(){
 		var olddata = gamehistory[currenthistoryposition]
 		if ((newdata != olddata) /*&& (currenthistoryposition == gamehistory.length -2)*/){
 			gamehistory.push(newdata);
+			handhistory.push(hand.toJSON())
 			currenthistoryposition = gamehistory.length -1;
 			colorHistoryButtons();
 			synchronizeScenes();
@@ -894,6 +899,14 @@ function mouseUpInHand(){
 			
 			addBackImageToCard(img, activeObject.backimage);
 			hand.add(img).setActiveObject(img);
+			img.toObject = (function(toObject) {
+			  return function() {
+				return fabric.util.object.extend(toObject.call(img), {
+				  oldScaleX: img.oldScaleX,
+				  oldScaleY: img.oldScaleY
+				});
+			  };
+			})(img.toObject);
 			canvas.remove(activeObject)	
 			var handobjects = hand.getObjects();
 			for (card in handobjects){
@@ -1323,8 +1336,12 @@ function loadHistory(position){
 		canvas.loadFromJSON(gamehistory[position], canvas.renderAll.bind(canvas), function(o, object) {
 			object.set('selectable', false);
 		})
+		hand.loadFromJSON(handhistory[position], hand.renderAll.bind(hand), function(o, object){
+			object.set('selectable', false);
+		})
 	} else {
 		loadGame(gamehistory[currenthistoryposition]);
+		hand.loadFromJSON(handhistory[position], hand.renderAll.bind(hand))
 	}
 }
 
@@ -1412,6 +1429,7 @@ function cloneSelected(){
 	canvas.getActiveObject().clone(function(cloned) {
 		Paste(cloned);
 	});
+	addCurrentStateToHistoryandSync()
 }
 
 function addcard(){
