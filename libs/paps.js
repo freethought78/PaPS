@@ -893,20 +893,21 @@ function mouseUpInHand(){
 			canvas.remove(activeObject)	
 			var handobjects = hand.getObjects();
 			for (card in handobjects){
+				var thiscard = handobjects[card]
 				var cardseparation = cardwidth /2;
-				handobjects[card].set({
-					left: (hand.width /2) + ((card - (handobjects.length /2))*cardseparation),
+				thiscard.set({
+					left: (hand.width /2) + ((card - ((handobjects.length-1) /2))*cardseparation),
 					top: 0,
 					lockMovementX: true
 				});
-				handobjects[card].on("mouseup", function(){
-					handobjects[card].set({
-						left: (hand.width /2) + ((card - (handobjects.length /2))*cardseparation),
+				thiscard.on("mouseup", function(){
+					thiscard.set({
+						left: (hand.width /2) + ((card - ((handobjects.length-1) /2))*cardseparation),
 						top: 0,
 						lockMovementX: true
 					});
 				})
-				handobjects[card].setCoords();
+				thiscard.setCoords();
 			}
 
 			hand.renderAll.bind(hand);
@@ -939,13 +940,13 @@ function mouseUpOffHand(){
 			for (card in handobjects){
 				var cardseparation = cardwidth /2;
 				handobjects[card].set({
-					left: (hand.width /2) + ((card - (handobjects.length /2))*cardseparation),
+					left: (hand.width /2) + ((card - ((handobjects.length-1) /2))*cardseparation),
 					top: 0,
 					lockMovementX: true
 				});
 				handobjects[card].on("mouseup", function(){
 					handobjects[card].set({
-						left: (hand.width /2) + ((card - (handobjects.length /2))*cardseparation),
+						left: (hand.width /2) + ((card - ((handobjects.length-1) /2))*cardseparation),
 						top: 0,
 						lockMovementX: true
 					});
