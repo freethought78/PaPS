@@ -1169,6 +1169,8 @@ function flip(){
 			img.scaleY = card.getScaledHeight() / img.height
 			img.top = card.top;
 			img.left = card.left;
+			img.originX = "center"
+			img.originY = "center"
 			addBackImageToCard(img, card.getSrc());
 			canvas.add(img).setActiveObject(img);
 			canvas.remove(card)
@@ -1341,7 +1343,9 @@ function loadHistory(position){
 		})
 	} else {
 		loadGame(gamehistory[currenthistoryposition]);
-		hand.loadFromJSON(handhistory[position], hand.renderAll.bind(hand))
+		hand.loadFromJSON(handhistory[position], hand.renderAll.bind(hand), function(o, object){
+			object.set('selectable', true);
+		})
 	}
 }
 
@@ -1449,6 +1453,10 @@ function submitcard(url, backimage, deck){
 	}
 	fabric.Image.fromURL(url, function(img) {
 	  img.scale(0.3);
+	  img.originX = "center"
+	  img.originY = "center"
+	  img.top = img.getScaledHeight()
+	  img.left = img.getScaledWidth();
 	  canvas.add(img)
 	  addBackImageToCard(img, backimage);
 	  if(deck){
