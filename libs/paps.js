@@ -39,10 +39,33 @@
 	
 	// code begins executing here when page loads
 	$(function(){
+		fontLoader({family: 'Inika'})
+		addCss("libs/menu.css");
 		createMainMenu();
 	})
 	
 
+
+var fontLoader = function (param) {
+	var headID = document.getElementsByTagName('head')[0];
+	var link = document.createElement('link');
+	link.type = 'text/css';
+	link.rel = 'stylesheet';
+
+	//link.href = 'http://fonts.googleapis.com/css?family=Oswald&effect=neon';
+	headID.appendChild(link);
+
+	link.href = 'http://fonts.googleapis.com/css?family=' + param.family
+};
+
+function addCss(fileName) {
+   var link = $("<link />",{
+     rel: "stylesheet",
+     type: "text/css",
+     href: fileName
+   })
+   $('head').append(link);
+}
 
 function post(data){
 	chathistory += "<br>"+data
@@ -1144,7 +1167,58 @@ function shuffleActiveDecks(){
 	addCurrentStateToHistoryandSync();
 }
 
+
 function createMenu(){
+
+var menucode = '<ul>'+
+	'<li>Game'+
+		'<ul class="dropdown">'+
+			'<li>New</li>'+
+			'<li onclick = "openfiledialog();">Load</li>'+
+			'<li onclick = "saveGame()">Save</li>'+
+		'</ul>'+
+	'</li>'+
+	'<li>Add'+
+		'<ul class="dropdown">'+
+			'<li onclick = "addcard();">Card</li>'+
+			'<li onclick = "addDeck();">Deck</li>'+
+			'<li>Token</li>'+
+			'<li>Stack</li>'+
+			'<li>Bag</li>'+
+			'<li>Board</li>'+
+			'<li>Dice</li>'+
+			'<li>Document</li>'+
+			'<li onclick = "cloneSelected();">Clone</li>'+
+			'<li>Extras</li>'+
+		'</ul>'+
+	'</li>'+
+	'<li>Change'+
+		'<ul class="dropdown">'+
+			'<li onclick = "flip();">Flip</li>'+
+			'<li onclick = "shuffleActiveDecks();">Shuffle</li>'+
+			'<li onclick = "glueObject();">Glue</li>'+
+			'<li onclick = "lockObject();">Lock</li>'+
+			'<li onclick = "unlockObject();">Unlock</li>'+
+			'<li onclick = "deleteSelected();">Delete</li>'+
+			'<li onclick = "bringToFront();">Bring to Front</li>'+
+		'</ul>'+
+	'</li>'+
+	'<li>View'+
+		'<ul class="dropdown">'+
+			'<li id = "setBackground" onclick = "setBackground()">Background Image</li>'+
+			'<li id = >Background Color <input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'"></li>'+
+			'<li onclick = "fullscreen();">Full Screen</li>'+
+		'</ul>'+
+	'</li>'+
+	'<li id = "historyStart" onclick = "historyStart()" style="background:gray"><<</li>'+
+	'<li id = "historyBack" onclick = "historyBack()" style="background:gray"><</li>'+
+	'<li id = "historyForward" onclick = "historyForward()" style="background:gray">></li>'+
+	'<li id = "historyEnd" onclick = "historyEnd()" style="background:gray">>></li>'+
+'</ul>'
+	
+	
+
+/*
 	var menucode = '<button onclick = "addcard();">New Card</button>'+
 	'<button onclick = "flip();">Flip</button>'+
 	'<button onclick = "addDeck();">New Deck</button>'+
@@ -1164,10 +1238,14 @@ function createMenu(){
 	'<button id = "setBackground" onclick = "setBackground()">Background</button>'+
 	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">'+
 	'<button onclick = "fullscreen();">Full Screen</button>';
+
+*/
 	
 	$("#menu").html(menucode);
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
+
+
 
 function setBackground(){
 	menu.innerHTML += "<input id='backgroundurl'></input><button onclick = 'submitBackground();'>Submit</button>";
