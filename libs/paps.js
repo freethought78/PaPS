@@ -22,6 +22,8 @@
 	var nfc
 	var nfcdiv
 	var handhistory = [];
+	var handBackgroundColor = "rgba(0,0,0,0.5)";
+	var handHighlightColor = "rgba(255,140,0, 0.5)"
 	
 	actingServer = "none";
 
@@ -297,7 +299,7 @@ function interpretNetworkData(data){
 		var message = data.message;
 		post(sender + ": " + message);
 		
-		$("#chatcontainer").css({"background-color": "orange"});
+		$("#chatcontainer").css({"background-color": handHighlightColor});
 
 	}
 	
@@ -416,9 +418,7 @@ function addHand(){
 		"position": "absolute",
 		"top": window.innerHeight - 50,
 		"z-index": 1,
-		"color": "white",
-		"background-color": "lightgray",
-		"opacity": 0.8,
+		"background-color": handBackgroundColor,
 		"height": window.innerHeight,
 		"width": window.innerWidth,
 		"padding": 0
@@ -440,8 +440,6 @@ function addHand(){
 			hand.discardActiveObject().renderAll();
 			//canvas.add(dragImage);
 			
-			
-			//$(handcontainer).css({"background-color": "orange"});
 			fabric.Image.fromURL(event.target.getSrc(), function(img) {
 				//var cardwidth = hand.width / 10
 				//var cardscale =  cardwidth / img.width
@@ -521,7 +519,7 @@ function addHand(){
 				
 				$("body").mouseup(function(){
 					if (globals.img != null){
-						$(hand).css({"background-color": "lightgray"})
+						$(hand).css({"background-color": handBackgroundColor})
 						canvas.add(globals.img)
 						canvas.setActiveObject(globals.img)
 						fc.remove(globals.img)
@@ -542,7 +540,7 @@ function addHand(){
 	
 	
 	$(handcontainer).click(function(){
-		$(handcontainer).css({"background-color": "lightgray"});
+		$(handcontainer).css({"background-color": handBackgroundColor});
 		$(handcontainer).animate({
 		top: $(window).height() - 200}, 200, "linear", function(){
 		});
@@ -906,7 +904,7 @@ function addCardFromTableToHandListener(){
 			
 			var activeObject = canvas.getActiveObject();
 			activeObject.clone(function (c) { dragImage = c; });
-			$(handcontainer).css({"background-color": "orange"});
+			$(handcontainer).css({"background-color": handHighlightColor});
 		}
 	});
 	
@@ -924,7 +922,7 @@ function rescaleCardsInHand(){
 }
 
 function mouseUpInHand(){
-	$(handcontainer).css({"background-color": "lightgray"})
+	$(handcontainer).css({"background-color": handBackgroundColor})
 	if (dragImage != null) {
 		//var aspectratio = dragImage.getScaledHeight()/dragImage.getScaledWidth();
 		var activeObject = canvas.getActiveObject();
