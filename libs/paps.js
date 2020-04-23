@@ -13,7 +13,7 @@
 	var chathistory ="";
 	var gamehistory = [];
 	var currenthistoryposition = 0;
-	var defaultbackimage = "http://clipart-library.com/images/8cEbeEMLi.png";
+	var defaultbackimage = papscardback;
 	var hand;
 	var dragImage;
 	var handcontents = [];
