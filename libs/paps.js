@@ -1196,11 +1196,14 @@ var menucode = '<ul>'+
 		'<ul class="dropdown">'+
 			'<li onclick = "flip();">Flip</li>'+
 			'<li onclick = "shuffleActiveDecks();">Shuffle</li>'+
+			'<li>Face</li>'+
+			'<li>Back</li>'+
 			'<li onclick = "glueObject();">Glue</li>'+
 			'<li onclick = "lockObject();">Lock</li>'+
 			'<li onclick = "unlockObject();">Unlock</li>'+
 			'<li onclick = "deleteSelected();">Delete</li>'+
 			'<li onclick = "bringToFront();">Bring to Front</li>'+
+			'<li>Send To Back</li>'+
 		'</ul>'+
 	'</li>'+
 	'<li>View'+
@@ -1210,12 +1213,13 @@ var menucode = '<ul>'+
 			'<li onclick = "fullscreen();">Full Screen</li>'+
 		'</ul>'+
 	'</li>'+
+'</ul>'+
+'<ul style="float:right">'+
 	'<li id = "historyStart" onclick = "historyStart()" style="background:gray"><<</li>'+
 	'<li id = "historyBack" onclick = "historyBack()" style="background:gray"><</li>'+
 	'<li id = "historyForward" onclick = "historyForward()" style="background:gray">></li>'+
 	'<li id = "historyEnd" onclick = "historyEnd()" style="background:gray">>></li>'+
 '</ul>'
-	
 	
 
 /*
@@ -1241,7 +1245,7 @@ var menucode = '<ul>'+
 
 */
 	
-	$("#menu").html(menucode);
+	$("#menu").html(menucode).css({width: "100%"});
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
 
