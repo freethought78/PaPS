@@ -634,21 +634,25 @@ function addChat(){
 		"color": "white",
 		"background-color": "black",
 		"opacity": 0.5,
-		"height": $(window).height() / 2,
+		"height": "50%",
 		"width": 200,
 		"padding": "5px"
 	});
 	
-	$(chatoutput).css({
-		"height": $(chatcontainer).height() - $(chatinput).height() - 20
-	});
+	$(function(){
+		$(chatoutput).css({
+			"height": $(chatcontainer).height() - $(chatinput).height() - 20
+		});
+		console.log($(chatcontainer).height())
+	})
 	
 	$(chatinput).css({
 		"height": "20px",
 		"background-color": "white",
 		"color": "black",
 		"width": "100%",
-		"resize": "none"
+		"resize": "none",
+		"top": $(chatoutput).height()
 	});
 	
 	$(chatinput).keyup(function(){
@@ -867,8 +871,8 @@ function resizeCanvas(){
 
 function createCanvas(){
 
-	var height = $(window).height();
-	var width = $(window).width();
+	var height = window.innerHeight;
+	var width = window.innerWidth;
 
 	var canvascode = "<canvas id='c' width='"+width+"' height='"+height+"'></canvas>";
 
