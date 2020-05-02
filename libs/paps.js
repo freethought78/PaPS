@@ -40,9 +40,12 @@
 	// code begins executing here when page loads
 	$(function(){
 		fontLoader({family: 'Inika'})
-		addCss("libs/menu.css");
+		var menucss = "a { text-decoration: none;} ul {  background: darkorange;    list-style: none;    margin: 0;    padding-left: 0;} li {	background: rgb(207,231,250);background: -moz-linear-gradient(top, rgb(207,231,250) 0%, rgb(99,147,193) 100%);	background: -webkit-linear-gradient(top, rgb(207,231,250) 0%,rgb(99,147,193) 100%);	background: linear-gradient(to bottom, rgb(207,231,250) 0%,rgb(99,147,193) 100%);	filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#cfe7fa', endColorstr='#6393c1',GradientType=0 )    color: #000;    display: block;    float: left;    padding: 0.3rem;    position: relative;    text-decoration: none;	transition-duration: 0.5s;	border:1px solid #000;	font-family: 'Inika', cursive; 	font-size: 1.2rem;	text-align: center;}  li a {  color: #00003f;  text-shadow: 0px 2px 3px #666;}li:hover {	background: rgb(255,33,33);	background: -moz-linear-gradient(top,  rgb(255,33,33) 0%, rgb(255,75,75) 55%,rgb(255,111,111) 100%);	background: -webkit-linear-gradient(top,  rgb(255,33,33) 0%,rgb(255,75,75) 55%,rgb(255,111,111) 100%);	background:linear-gradient(to bottom,  rgb(255,33,33) 0%,rgb(255,75,75) 55%,rgb(255,111,111) 100%);	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff2121', endColorstr='#ff6f6f',GradientType=0 );    cursor: pointer;}ul li ul {    visibility: hidden;  opacity: 0;  min-width: 0.3rem;    position: absolute;  transition: all 0.5s ease;  margin-top: 0.3rem;    left: 0;  display: none;}ul li:hover > ul,ul li ul:hover {  visibility: visible;  opacity: 1;  display:block;}ul li ul li {    clear: both;  width: 100%;}"
+		addCss(menucss);
 		createMainMenu();
 	})
+	
+
 	
 
 
@@ -58,13 +61,9 @@ var fontLoader = function (param) {
 	link.href = 'http://fonts.googleapis.com/css?family=' + param.family
 };
 
-function addCss(fileName) {
-   var link = $("<link />",{
-     rel: "stylesheet",
-     type: "text/css",
-     href: fileName
-   })
-   $('head').append(link);
+function addCss(css) {
+   var result = "<style>"+css+"</style>"
+   $('head').append(result);
 }
 
 function post(data){
@@ -146,7 +145,7 @@ function broadcast(packet){
 
 function createMainMenu(){
 	$("body").html(
-		'<button style="position:absolute; background-color:green" onclick="startSinglePlayer()">Single Player</button>'+
+		'<button id="singlePlayerButton" style="position:absolute; background-color:green">Single Player</button>'+
 		'<center>'+
 		'<div id="pageContent">'+
 		'<div style="background-color: #152E5E;">'+
@@ -155,14 +154,18 @@ function createMainMenu(){
 		'<br><span style="font-size: 1.5em">Your Nickname:</span><br>'+
 		'<div id="nameInputDiv">'+
 		'<input id="nameInput"><br>'+
-		'<button onclick="addConnectionDetails()">Submit Name</button>'+
+		'<button id="Submit Name">Submit Name</button>'+
 		'</div>'+
 		'<br><br>'+
 		'</div>'+
 		'</center>'
 	);
+	
+	$("#Submit Name").click(function(){addConnectionDetails()})
 	$("body").css("margin", 0);
 	$("body").css("background-color", "#BDF8BA");
+	$("#singlePlayerButton").click(function(){startSinglePlayer()});
+	
 	
 	//Enter pressed inside nickname input is the same as pressing the submit button
 	$("#nameInput").on('keyup', function (e) {
@@ -191,9 +194,11 @@ function addConnectionDetails(){
 }
 
 function addHostOrJoinControls(){
-	var controlscode = '<div id="connectbuttons"><button onclick=connect("server")>Host Game</button>' +
-	'<button onclick=connect("client")>Join Game</button></div>'
+	var controlscode = '<div id="connectbuttons"><button id="Host Game">Host Game</button>' +
+	'<button id="Join Game">Join Game</button></div>'
 	$("#pageContent").append(controlscode);
+	$("#Host Game").click(function(){connect("server")})
+	$("#Join Game").click(function(){connect("client")})
 }
 
 function connect(connectiontype){
@@ -1097,7 +1102,7 @@ function keyListener(e) {
 		constrainZoom();
 		constrainViewport();
 		canvas.setZoom(zoom);
-		
+		canvas.renderAll.bind(canvas)
 	};
 }
 	
@@ -1178,85 +1183,81 @@ var menucode = '<ul>'+
 	'<li>Game'+
 		'<ul class="dropdown">'+
 			'<li>New</li>'+
-			'<li onclick = "openfiledialog();">Load</li>'+
-			'<li onclick = "saveGame()">Save</li>'+
+			'<li id="Load">Load</li>'+
+			'<li id="Save">Save</li>'+
 		'</ul>'+
 	'</li>'+
 	'<li>Add'+
 		'<ul class="dropdown">'+
-			'<li onclick = "addcard();">Card</li>'+
-			'<li onclick = "addDeck();">Deck</li>'+
-			'<li>Token</li>'+
-			'<li>Stack</li>'+
-			'<li>Bag</li>'+
-			'<li>Board</li>'+
-			'<li>Dice</li>'+
-			'<li>Document</li>'+
-			'<li onclick = "cloneSelected();">Clone</li>'+
-			'<li>Extras</li>'+
+			'<li id="Card">Card</li>'+
+			'<li id="Deck">Deck</li>'+
+			'<li id="Token">Token</li>'+
+			'<li id="Stack">Stack</li>'+
+			'<li id="Bag">Bag</li>'+
+			'<li id="Board">Board</li>'+
+			'<li id="Dice">Dice</li>'+
+			'<li id="Document">Document</li>'+
+			'<li id="Clone">Clone</li>'+
+			'<li id="Extras">Extras</li>'+
 		'</ul>'+
 	'</li>'+
 	'<li>Change'+
 		'<ul class="dropdown">'+
-			'<li onclick = "flip();">Flip</li>'+
-			'<li onclick = "shuffleActiveDecks();">Shuffle</li>'+
-			'<li>Face</li>'+
-			'<li>Back</li>'+
-			'<li onclick = "glueObject();">Glue</li>'+
-			'<li onclick = "lockObject();">Lock</li>'+
-			'<li onclick = "unlockObject();">Unlock</li>'+
-			'<li onclick = "deleteSelected();">Delete</li>'+
-			'<li onclick = "bringToFront();">Bring to Front</li>'+
-			'<li>Send To Back</li>'+
+			'<li id="Flip">Flip</li>'+
+			'<li id="Shuffle">Shuffle</li>'+
+			'<li id="Face">Face</li>'+
+			'<li id="Back">Back</li>'+
+			'<li id="Glue">Glue</li>'+
+			'<li id="Lock">Lock</li>'+
+			'<li id="Unlock">Unlock</li>'+
+			'<li id="Delete">Delete</li>'+
+			'<li id="Bring To Front">Bring to Front</li>'+
+			'<li id="Send To Back">Send To Back</li>'+
 		'</ul>'+
 	'</li>'+
 	'<li>View'+
 		'<ul class="dropdown">'+
-			'<li id = "setBackground" onclick = "setBackground()">Background Image</li>'+
-			'<li id = >Background Color <input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'"></li>'+
-			'<li onclick = "fullscreen();">Full Screen</li>'+
+			'<li id = "setBackground">Background Image</li>'+
+			'<li id="Background Color">Background Color <input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'"></li>'+
+			'<li id="Full Screen">Full Screen</li>'+
 		'</ul>'+
 	'</li>'+
 '</ul>'+
 '<ul style="float:right">'+
-	'<li id = "historyStart" onclick = "historyStart()" style="background:gray"><<</li>'+
-	'<li id = "historyBack" onclick = "historyBack()" style="background:gray"><</li>'+
-	'<li id = "historyForward" onclick = "historyForward()" style="background:gray">></li>'+
-	'<li id = "historyEnd" onclick = "historyEnd()" style="background:gray">>></li>'+
+	'<li id = "historyStart" style="background:gray"><<</li>'+
+	'<li id = "historyBack" style="background:gray"><</li>'+
+	'<li id = "historyForward" style="background:gray">></li>'+
+	'<li id = "historyEnd" style="background:gray">>></li>'+
 '</ul>'
 	
 
-/*
-	var menucode = '<button onclick = "addcard();">New Card</button>'+
-	'<button onclick = "flip();">Flip</button>'+
-	'<button onclick = "addDeck();">New Deck</button>'+
-	'<button onclick = "shuffleActiveDecks();">Shuffle</button>'+
-	'<button onclick = "cloneSelected();">Clone</button>'+
-	'<button onclick = "deleteSelected();">Delete</button>'+
-	'<button onclick = "saveGame()">Save Game</button>'+
-	'<button onclick = "openfiledialog();">Load Game</button>'+
-	'<button onclick = "glueObject();">Glue to Table</button>'+
-	'<button onclick = "lockObject();">Lock</button>'+
-	'<button onclick = "unlockObject();">Unlock</button>'+
-	'<button onclick = "bringToFront();">Bring to Front</button>'+
-	'<button id = "historyStart" onclick = "historyStart()" style="background:gray"><<</button>'+
-	'<button id = "historyBack" onclick = "historyBack()" style="background:gray"><</button>'+
-	'<button id = "historyForward" onclick = "historyForward()" style="background:gray">></button>'+
-	'<button id = "historyEnd" onclick = "historyEnd()" style="background:gray">>></button>'+
-	'<button id = "setBackground" onclick = "setBackground()">Background</button>'+
-	'<input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'">'+
-	'<button onclick = "fullscreen();">Full Screen</button>';
-
-*/
-	
 	$("#menu").html(menucode).css({width: "100%"});
+	$("#Load").click(function(){openfiledialog()})
+	$("#Save").click(function(){saveGame()})
+	$("#Card").click(function(){addcard()})
+	$("#Deck").click(function(){addDeck()})
+	$("#Clone").click(function(){cloneSelected()})
+	$("#Flip").click(function(){flip()})
+	$("#Shuffle").click(function(){shuffleActiveDecks()})
+	$("#Glue").click(function(){glueObject()})
+	$("#Lock").click(function(){lockObject()})
+	$("#Unlock").click(function(){unlockObject()})
+	$("#Delete").click(function(){deleteSelected()})
+	$("#Bring To Front").click(function(){bringToFront()})
+	$("#setBackground").click(function(){setBackground()})
+	$("#Full Screen").click(function(){fullscreen()})
+	$("#historyStart").click(function(){historyStart()})
+	$("#historyBack").click(function(){historyBack()})
+	$("#historyForward").click(function(){historyForward()})
+	$("#historyEnd").click(function(){historyEnd()})
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
 
 
 
 function setBackground(){
-	menu.innerHTML += "<input id='backgroundurl'></input><button onclick = 'submitBackground();'>Submit</button>";
+	menu.innerHTML += "<input id='backgroundurl'></input><button id='submitBackground'>Submit</button>";
+	$("#submitBackground").click(function(){submitBackground()})
 }
 
 function submitBackground(){
@@ -1555,11 +1556,13 @@ function cloneSelected(){
 }
 
 function addcard(){
-	menu.innerHTML += "<input id='cardurl'></input><button onclick = 'submitcard();'>Submit</button>";
+	menu.innerHTML += "<input id='cardurl'></input><button id='submitcard'>Submit</button>";
+	$("#submitcard").click(function(){submitcard()})
 }
 
 function addDeck(){
-	menu.innerHTML += "<input id='deckurl'></input><button onclick = 'createDeck();'>Submit</button>";
+	menu.innerHTML += "<input id='deckurl'></input><button id='createDeck'>Submit</button>";
+	$("#createDeck").click(function(){createDeck()})
 }
 
 function submitcard(url, backimage, deck){
