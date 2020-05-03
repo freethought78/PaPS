@@ -895,6 +895,30 @@ function createCanvas(){
 	
 	stage = document.getElementById("c");
 	fabric.util.addListener(canvas.upperCanvasEl, "mouseup", function (e) {
+		var ao = canvas.getActiveObject();
+		if(!ao){return}
+		var decks = []
+		window.requestAnimationFrame(function(){
+			canvas.forEachObject(function(obj) {
+				if (obj.deck){decks.push(obj)}
+				//obj.set('opacity' ,options.target.intersectsWithObject(obj) ? 0.5 : 1);
+			});
+			decks.map(function(deck){	
+					if(ao.intersectsWithObject(deck)&&!ao.deck){
+						ao = canvas.getActiveObjects();
+						ao.map(function(obj){
+							console.log(deck)
+							canvas.remove(obj)
+							deck.deck.push(obj.toObject())
+							canvas.renderAll.bind(canvas);
+							
+						})
+					}
+				})
+			})
+		})
+		
+		/*
 		var _mouse = canvas.getPointer(e);
 		  if (e.target) {
 			var _targets = canvas.getObjects().filter(function (_obj) {
@@ -907,13 +931,7 @@ function createCanvas(){
 					selection = canvas.getActiveObjects();
 					for (currentimage in selection){
 						if(!selection[currentimage].deck){
-							/*
-							if(selection[currentimage].src == defaultbackimage){
-								var newcard = selection[currentimage].backimage;
-							}else{
-								var newcard = selection[currentimage].src;
-							}
-							*/
+
 							newcard = selection[currentimage];
 							objectsContainingPoint[card].deck.push(newcard.toObject());
 							canvas.remove(selection[currentimage]);
@@ -921,14 +939,14 @@ function createCanvas(){
 					}
 				}
 			  }
-		  }
-	})
+		  }*/
+	return(canvas);
+	}
 	
 	
 	
 
-	return(canvas);
-}
+
 
 function addCardFromTableToHandListener(){
 	canvas.observe("object:moving", function (event) {
@@ -1102,7 +1120,7 @@ function keyListener(e) {
 		constrainZoom();
 		constrainViewport();
 		canvas.setZoom(zoom);
-		canvas.renderAll.bind(canvas)
+
 	};
 }
 	
@@ -1139,6 +1157,11 @@ function addKeyListener(){
 			constrainZoom();
 			constrainViewport();
 			canvas.setZoom(zoom);	
+			var objects = canvas.getObjects(); //return Array<objects>
+			objects.forEach(object=>{
+				//list the attributes for each object
+				object.setCoords();
+			});
 		}
 	});
 }
