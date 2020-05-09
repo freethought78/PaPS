@@ -24,6 +24,7 @@
 	var handhistory = [];
 	var handBackgroundColor = "rgba(0,0,0,0.5)";
 	var handHighlightColor = "rgba(255,140,0, 0.5)"
+	var editmode = false;
 	
 	actingServer = "none";
 
@@ -717,6 +718,7 @@ function initialize(){
 			
 	canvas.setZoom(zoom);
 	
+	edit(false);
 	createMenu();	
 	
 	stage = document.getElementById("c");
@@ -797,6 +799,7 @@ function addCurrentStateToHistoryandSync(){
 			synchronizeScenes();
 		}
 	});
+	edit(editmode);
 }
 
 
@@ -1247,6 +1250,7 @@ var menucode = '<ul>'+
 	'</li>'+
 '</ul>'+
 '<ul style="float:right">'+
+	'<li id = "edit">Edit</li>'+
 	'<li id = "historyStart" style="background:gray"><<</li>'+
 	'<li id = "historyBack" style="background:gray"><</li>'+
 	'<li id = "historyForward" style="background:gray">></li>'+
@@ -1268,15 +1272,48 @@ var menucode = '<ul>'+
 	$("#Delete").click(function(){deleteSelected()})
 	$("#Bring To Front").click(function(){bringToFront()})
 	$("#setBackground").click(function(){setBackground()})
+	$("#edit").click(function(){edit()})
 	$("#Full Screen").click(function(){fullscreen()})
 	$("#historyStart").click(function(){historyStart()})
 	$("#historyBack").click(function(){historyBack()})
 	$("#historyForward").click(function(){historyForward()})
 	$("#historyEnd").click(function(){historyEnd()})
+	
+	if(editmode){
+		$("#edit").css({
+			"background": "rgb(255,33,33)",
+			"background": "-moz-linear-gradient(top,  rgb(255,33,33) 0%, rgb(255,75,75) 55%,rgb(255,111,111) 100%)",
+			"background": "-webkit-linear-gradient(top,  rgb(255,33,33) 0%,rgb(255,75,75) 55%,rgb(255,111,111) 100%)",
+			"background": "linear-gradient(to bottom,  rgb(255,33,33) 0%,rgb(255,75,75) 55%,rgb(255,111,111) 100%)",
+			"filter": "progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff2121', endColorstr='#ff6f6f',GradientType=0 )"	
+		})
+
+	}else{
+		$("#edit").css({
+			"background": "rgb(207,231,250)",
+			"background": "-moz-linear-gradient(top, rgb(207,231,250) 0%, rgb(99,147,193) 100%)",
+			"background": "-webkit-linear-gradient(top, rgb(207,231,250) 0%,rgb(99,147,193) 100%)",
+			"background": "linear-gradient(to bottom, rgb(207,231,250) 0%,rgb(99,147,193) 100%)",
+			"filter:progid":"DXImageTransform.Microsoft.gradient( startColorstr='#cfe7fa', endColorstr='#6393c1',GradientType=0 )" 
+		})		
+	}
+
 	backgroundColorSelector = document.getElementById("colorpicker");
 }
 
+function edit(setEdit){
+	if (setEdit == null){
+		editmode = !editmode
+	} else {
+		editmode = setEdit
+	}
 
+	canvas.forEachObject(function(obj){
+		obj.lockScalingX = !editmode;
+		obj.lockScalingY = !editmode;
+	})
+	createMenu();
+}
 
 function setBackground(){
 	menu.innerHTML += "<input id='backgroundurl'></input><button id='submitBackground'>Submit</button>";
