@@ -155,14 +155,14 @@ function createMainMenu(){
 		'<br><span style="font-size: 1.5em">Your Nickname:</span><br>'+
 		'<div id="nameInputDiv">'+
 		'<input id="nameInput"><br>'+
-		'<button id="Submit Name">Submit Name</button>'+
+		'<button id="SubmitName">Submit Name</button>'+
 		'</div>'+
 		'<br><br>'+
 		'</div>'+
 		'</center>'
 	);
 	
-	$("#Submit Name").click(function(){addConnectionDetails()})
+	$("#SubmitName").click(function(){addConnectionDetails()})
 	$("body").css("margin", 0);
 	$("body").css("background-color", "#BDF8BA");
 	$("#singlePlayerButton").click(function(){startSinglePlayer()});
@@ -195,11 +195,11 @@ function addConnectionDetails(){
 }
 
 function addHostOrJoinControls(){
-	var controlscode = '<div id="connectbuttons"><button id="Host Game">Host Game</button>' +
-	'<button id="Join Game">Join Game</button></div>'
+	var controlscode = '<div id="connectbuttons"><button id="HostGame">Host Game</button>' +
+	'<button id="JoinGame">Join Game</button></div>'
 	$("#pageContent").append(controlscode);
-	$("#Host Game").click(function(){connect("server")})
-	$("#Join Game").click(function(){connect("client")})
+	$("#HostGame").click(function(){connect("server")})
+	$("#JoinGame").click(function(){connect("client")})
 }
 
 function connect(connectiontype){
@@ -345,10 +345,6 @@ function interpretNetworkData(data){
 		currenthistoryposition = gamehistory.length - 1;
 		colorHistoryButtons();
 		loadGame(data.state);
-		window.requestAnimationFrame(function(){
-			addKeyListener();	
-		})
-		
 	}
 
 	// this packet is set from the server containing a list of connected peers
@@ -953,6 +949,7 @@ function createCanvas(){
 
 function addCardFromTableToHandListener(){
 	canvas.observe("object:moving", function (event) {
+		bringToFront();
 		if(Intersect([event.e.clientX, event.e.clientY], handcontainer)){
 			
 			var activeObject = canvas.getActiveObject();
@@ -1237,15 +1234,15 @@ var menucode = '<ul>'+
 			'<li id="Lock">Lock</li>'+
 			'<li id="Unlock">Unlock</li>'+
 			'<li id="Delete">Delete</li>'+
-			'<li id="Bring To Front">Bring to Front</li>'+
-			'<li id="Send To Back">Send To Back</li>'+
+			'<li id="BringToFront">Bring to Front</li>'+
+			'<li id="SendToBack">Send To Back</li>'+
 		'</ul>'+
 	'</li>'+
 	'<li>View'+
 		'<ul class="dropdown">'+
 			'<li id = "setBackground">Background Image</li>'+
 			'<li id="Background Color">Background Color <input type="color" id="colorpicker" onchange="setBackgroundColor()" value="'+backgroundColor+'"></li>'+
-			'<li id="Full Screen">Full Screen</li>'+
+			'<li id="FullScreen">Full Screen</li>'+
 		'</ul>'+
 	'</li>'+
 '</ul>'+
@@ -1270,10 +1267,11 @@ var menucode = '<ul>'+
 	$("#Lock").click(function(){lockObject()})
 	$("#Unlock").click(function(){unlockObject()})
 	$("#Delete").click(function(){deleteSelected()})
-	$("#Bring To Front").click(function(){bringToFront()})
+	$("#BringToFront").click(function(){bringToFront()})
+	$("#SendToBack").click(function(){sendToBack()})
 	$("#setBackground").click(function(){setBackground()})
 	$("#edit").click(function(){edit()})
-	$("#Full Screen").click(function(){fullscreen()})
+	$("#FullScreen").click(function(){fullscreen()})
 	$("#historyStart").click(function(){historyStart()})
 	$("#historyBack").click(function(){historyBack()})
 	$("#historyForward").click(function(){historyForward()})
@@ -1451,9 +1449,18 @@ function unlockObject(){
 
 function bringToFront(){
 	var selection = canvas.getActiveObjects();
-	for (target in selection){
-		selection[target].bringToFront();
-	}
+	selection.forEach(function(target){
+		console.log('front')
+		canvas.bringToFront(target);
+	})
+}
+
+function sendToBack(){
+	var selection = canvas.getActiveObjects();
+	selection.forEach(function(target){
+		console.log('front')
+		canvas.sendToBack(target);
+	})
 }
 
 function historyStart(){
@@ -1513,6 +1520,7 @@ function colorHistoryButtons(){
 }
 
 function loadHistory(position){
+	/*
 	if(position != gamehistory.length -1){
 		canvas.loadFromJSON(gamehistory[position], canvas.renderAll.bind(canvas), function(o, object) {
 			object.set('selectable', false);
@@ -1520,12 +1528,13 @@ function loadHistory(position){
 		hand.loadFromJSON(handhistory[position], hand.renderAll.bind(hand), function(o, object){
 			object.set('selectable', false);
 		})
-	} else {
+	} else {*/
 		loadGame(gamehistory[currenthistoryposition]);
 		hand.loadFromJSON(handhistory[position], hand.renderAll.bind(hand), function(o, object){
 			object.set('selectable', true);
 		})
-	}
+
+	//}
 }
 
 function openfiledialog(){
@@ -1561,9 +1570,6 @@ function loadFile(fileToRead){
 	var fileToRead = document.querySelector('input').files[0];
 	reader.addEventListener("loadend", function() {
 	   loadGame(reader.result);
-	   window.requestAnimationFrame(function(){
-		   addCurrentStateToHistoryandSync();
-	   })
 	});
 	reader.readAsText(fileToRead);
 }
@@ -1597,6 +1603,9 @@ function loadGame(inputJSON){
 					}
 				})
 			}
+		})
+		window.requestAnimationFrame(function(){
+			addCurrentStateToHistoryandSync();
 		})
 	});
 }
@@ -1646,10 +1655,13 @@ function submitcard(url, backimage, deck){
 		img.scaleX = (deck.item(0).getScaledWidth() / img.width) * deck.scaleX;
 		img.scaleY = (deck.item(0).getScaledHeight() / img.height) *deck.scaleY
 		img.setCoords();
-	  }
+	  }	
+	  window.requestAnimationFrame(function(){
+		addCurrentStateToHistoryandSync()
+	  })
 	});
 	createMenu();
-	addCurrentStateToHistoryandSync()
+
 }
 
 function createDeck(){
