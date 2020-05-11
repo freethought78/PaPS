@@ -1335,35 +1335,52 @@ function submitBackground(){
 function flip(){
 	canvas.getActiveObjects().forEach(function(card){
 		var backimage;
+		var frontimage;
 		if (card.backimage){
 			backimage = card.backimage;
 		}else{
 			backimage = defaultbackimage
 		}
+		var scaleX = card.getScaledWidth() 
+		var scaleY = card.getScaledHeight()
 		
+		frontimage = card.getSrc();
+		card.setSrc(backimage, function(){
+			window.requestAnimationFrame(function(){
+				card.scaleX = scaleX / card.width
+				card.scaleY = scaleY / card.height
+				canvas.renderAll()
+			})
+			card.backimage = frontimage;
+		})
+		
+		
+
+		
+
+
+		/*
 			fabric.Image.fromURL(backimage, function(img) {
 				
 				img.scaleX = card.getScaledWidth() / img.width
 				img.scaleY = card.getScaledHeight() / img.height
+				img.originX = "center"
+				img.originY = "center"
 				img.top = card.top;
 				img.left = card.left;
 				if (card.group){
-					img.top+=card.group.top
-					img.left+=card.group.left
+					img.top=card.top*zoom + card.group.top
+					img.left=card.left*zoom + card.group.left
 				}
-				img.originX = "center"
-				img.originY = "center"
 				addBackImageToCard(img, card.getSrc());
 				canvas.add(img)
 				//addCurrentStateToHistoryandSync();
 			})		
 
-		
+		*/
 
-	});			
-	canvas.getActiveObjects().forEach(function(obj){
-		canvas.remove(obj)
-	})
+	});	
+	addCurrentStateToHistoryandSync()
 }
 
 
