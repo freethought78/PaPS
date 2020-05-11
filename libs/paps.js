@@ -554,7 +554,7 @@ function addHand(){
 						$(nfcdiv).hide();
 						globals.img = null
 						canvas.renderAll()
-						addCurrentStateToHistoryandSync()
+						//addCurrentStateToHistoryandSync()
 						//addHand();
 					}
 				})
@@ -772,12 +772,12 @@ function addFileLoadListener(){
 
 function addCanvasEventListeners(){
 	// whenever the canvas is modified, synchronize it across the network
-	canvas.on('object:added', addCurrentStateToHistoryandSync());
-	canvas.on('object:removed', addCurrentStateToHistoryandSync());
-	canvas.on('object:modified', addCurrentStateToHistoryandSync());	
+	canvas.on('object:added', addCurrentStateToHistoryandSync);
+	canvas.on('object:removed', addCurrentStateToHistoryandSync);
+	canvas.on('object:modified', addCurrentStateToHistoryandSync);	
 	canvas.on('mouse:up', function(){
 		mouseUpOffHand();
-		addCurrentStateToHistoryandSync();
+		//addCurrentStateToHistoryandSync();
 	});
 	//$(".canvas-container").onmouseup = function(){addCurrentStateToHistoryandSync()};
 	//addKeyListener();
@@ -797,6 +797,7 @@ function addCurrentStateToHistoryandSync(){
 			colorHistoryButtons();
 			synchronizeScenes();
 		}
+		
 	});
 	edit(editmode);
 }
@@ -1013,7 +1014,7 @@ function mouseUpInHand(){
 			rescaleCardsInHand();
 			hand.renderAll.bind(hand);
 			
-			addCurrentStateToHistoryandSync();
+			//addCurrentStateToHistoryandSync();
 		})		
 	}
 	
@@ -1058,7 +1059,6 @@ function mouseUpOffHand(){
 			}
 
 			hand.renderAll.bind(hand);
-			//addCurrentStateToHistoryandSync();
 		})
 	}
 	dragImage = null;
@@ -1089,7 +1089,7 @@ function addZoomListener(){
 	  
 
 	
-	addKeyListener();
+	//addKeyListener();
 }
 
 function keyListener(e) {
@@ -1355,7 +1355,7 @@ function flip(){
 			addBackImageToCard(img, card.getSrc());
 			canvas.add(img).setActiveObject(img);
 			canvas.remove(card)
-			addCurrentStateToHistoryandSync();
+			//addCurrentStateToHistoryandSync();
 		})
 	}
 }
@@ -1415,7 +1415,7 @@ function glueObject(){
 				};
 			})(selection[target].toObject);
 			window.requestAnimationFrame(function(){
-				addCurrentStateToHistoryandSync();	
+				//addCurrentStateToHistoryandSync();	
 			})
 		}
 	}
@@ -1435,7 +1435,7 @@ function lockObject(){
 		};
 	})(selection[target].toObject);
 		window.requestAnimationFrame(function(){
-			addCurrentStateToHistoryandSync();	
+			//addCurrentStateToHistoryandSync();	
 		});
 	}
 }
@@ -1446,7 +1446,7 @@ function unlockObject(){
 		selection[target].lockMovementX = false
 		selection[target].lockMovementY = false
 		window.requestAnimationFrame(function(){
-			addCurrentStateToHistoryandSync();	
+			//addCurrentStateToHistoryandSync();	
 		});
 	}
 }
@@ -1581,6 +1581,16 @@ function loadFile(fileToRead){
 function loadGame(inputJSON){
 	canvas.loadFromJSON(inputJSON, function(){
 		canvas.forEachObject(function(thisobject){
+			if (thisobject.backimage != null){
+				thisobject.toObject = (function(toObject) {
+				  return function() {
+					return fabric.util.object.extend(toObject.call(thisobject), {
+					  backimage: thisobject.backimage
+					});
+				  };
+				})(thisobject.toObject);
+			}
+			
 			console.log('checking for decks')
 			if (thisobject.deck != null){
 				
@@ -1589,7 +1599,9 @@ function loadGame(inputJSON){
 				thisobject.toObject = (function(toObject) {
 				  return function() {
 					return fabric.util.object.extend(toObject.call(thisobject), {
-					  deck: JSON.stringify(thisobject.deck)
+					  deck: JSON.stringify(thisobject.deck),
+					  lockMovementX: thisobject.lockMovementX,
+					  lockMovementY: thisobject.lockMovementY
 					});
 				  };
 				})(thisobject.toObject);
@@ -1609,7 +1621,7 @@ function loadGame(inputJSON){
 			}
 		})
 		window.requestAnimationFrame(function(){
-			addCurrentStateToHistoryandSync();
+			addCurrentStateToHistoryandSync()
 		})
 	});
 }
@@ -1625,7 +1637,7 @@ function cloneSelected(){
 	canvas.getActiveObject().clone(function(cloned) {
 		Paste(cloned);
 	});
-	addCurrentStateToHistoryandSync()
+	//addCurrentStateToHistoryandSync()
 }
 
 function addcard(){
@@ -1661,7 +1673,7 @@ function submitcard(url, backimage, deck){
 		img.setCoords();
 	  }	
 	  window.requestAnimationFrame(function(){
-		addCurrentStateToHistoryandSync()
+		//addCurrentStateToHistoryandSync()
 	  })
 	});
 	createMenu();
@@ -1692,7 +1704,7 @@ function createDeck(){
 				addDeckToImage(newdeck);
 				newdeck.deck=[];
 				canvas.add(newdeck).setActiveObject(newdeck);
-				addCurrentStateToHistoryandSync();
+				//addCurrentStateToHistoryandSync();
 			  });
 			});
 		  });
