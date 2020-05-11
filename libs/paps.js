@@ -1650,8 +1650,8 @@ function submitcard(url, backimage, deck){
 	  canvas.add(img)
 	  addBackImageToCard(img, backimage);
 	  if(deck){
-		img.top = deck.top;
-		img.left = deck.left+deck.width*deck.scaleX;
+		img.top = deck.top+deck.height*deck.scaleY/2;
+		img.left = deck.left+deck.width*deck.scaleX*1.5;
 		img.scaleX = (deck.item(0).getScaledWidth() / img.width) * deck.scaleX;
 		img.scaleY = (deck.item(0).getScaledHeight() / img.height) *deck.scaleY
 		img.setCoords();
