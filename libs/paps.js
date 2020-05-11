@@ -345,6 +345,9 @@ function interpretNetworkData(data){
 		currenthistoryposition = gamehistory.length - 1;
 		colorHistoryButtons();
 		loadGame(data.state);
+		window.requestAnimationFrame(function(){
+			addKeyListener();	
+		})		
 	}
 
 	// this packet is set from the server containing a list of connected peers
@@ -1009,6 +1012,7 @@ function mouseUpInHand(){
 			recenterCardsInHand()
 			rescaleCardsInHand();
 			hand.renderAll.bind(hand);
+			
 			addCurrentStateToHistoryandSync();
 		})		
 	}
@@ -1054,8 +1058,8 @@ function mouseUpOffHand(){
 			}
 
 			hand.renderAll.bind(hand);
-			addCurrentStateToHistoryandSync();
-		})		
+			//addCurrentStateToHistoryandSync();
+		})
 	}
 	dragImage = null;
 }
