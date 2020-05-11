@@ -1088,8 +1088,7 @@ function addZoomListener(){
 	  
 	  
 
-	
-	//addKeyListener();
+	if(serverID=="disconnected"){addKeyListener()}
 }
 
 function keyListener(e) {
@@ -1334,9 +1333,7 @@ function submitBackground(){
 }
 
 function flip(){
-	selection = canvas.getActiveObjects();
-	for (item in selection){
-		var card = selection[item];
+	canvas.getActiveObjects().forEach(function(card){
 		var backimage;
 		if (card.backimage){
 			backimage = card.backimage;
@@ -1344,20 +1341,29 @@ function flip(){
 			backimage = defaultbackimage
 		}
 		
-		fabric.Image.fromURL(backimage, function(img) {
-			
-			img.scaleX = card.getScaledWidth() / img.width
-			img.scaleY = card.getScaledHeight() / img.height
-			img.top = card.top;
-			img.left = card.left;
-			img.originX = "center"
-			img.originY = "center"
-			addBackImageToCard(img, card.getSrc());
-			canvas.add(img).setActiveObject(img);
-			canvas.remove(card)
-			//addCurrentStateToHistoryandSync();
-		})
-	}
+			fabric.Image.fromURL(backimage, function(img) {
+				
+				img.scaleX = card.getScaledWidth() / img.width
+				img.scaleY = card.getScaledHeight() / img.height
+				img.top = card.top;
+				img.left = card.left;
+				if (card.group){
+					img.top+=card.group.top
+					img.left+=card.group.left
+				}
+				img.originX = "center"
+				img.originY = "center"
+				addBackImageToCard(img, card.getSrc());
+				canvas.add(img)
+				//addCurrentStateToHistoryandSync();
+			})		
+
+		
+
+	});			
+	canvas.getActiveObjects().forEach(function(obj){
+		canvas.remove(obj)
+	})
 }
 
 
